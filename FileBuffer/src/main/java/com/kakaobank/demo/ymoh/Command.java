@@ -1,28 +1,21 @@
 package com.kakaobank.demo.ymoh;
 
-public class Command {
-
-    private String sessionId;
+public class Command implements java.io.Serializable {
 
     private String method;
 
-    private String parameterString;
+    private int length;
+
+    private String sessionId;
 
     public Command() {
         super();
     }
 
-    public Command(String method, String parameterString) {
+    public Command(String method, int length, String sessionId) {
         this();
         this.method = method;
-        this.parameterString = parameterString;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
+        this.length = length;
         this.sessionId = sessionId;
     }
 
@@ -34,16 +27,24 @@ public class Command {
         this.method = method;
     }
 
-    public String getParameterString() {
-        return parameterString;
+    public int getLength() {
+        return length;
     }
 
-    public void setParameterString(String parameterString) {
-        this.parameterString = parameterString;
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     public String toString() {
-        return String.format("%s %s", method, parameterString);
+        return String.format("%s %d %s", method, length, sessionId);
     }
 
 }

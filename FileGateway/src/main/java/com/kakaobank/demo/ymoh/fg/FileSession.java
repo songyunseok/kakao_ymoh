@@ -38,17 +38,23 @@ public class FileSession implements Session {
                 running = true;
                 while (true) {
                     try {
-                        byte[] commandBytes = new byte[OP_COMMAND_SIZE];
-                        int commandSize = SessionUtils.read(socketChannel, commandBytes);
-                        if (commandSize < 0) {
+                        byte[] methodBytes = new byte[SessionUtils.OP_NETHOD_SIZE];
+                        int n = SessionUtils.read(socketChannel, methodBytes);
+                        if (n < 0) {
                             throw new EOFException(String.format("FileSession '%s' was disconnected", sessionId));
                         }
-                        String commandString = new String(commandBytes).trim();
-                        logger.debug("FileSession '%s' = %s", sessionId, commandString);
-                        Command command = SessionUtils.parseCommand(commandString);
+                        String method = SessionUtils.parseString(methodBytes);
+                        logger.debug("FileSession '%s' method = %s", sessionId, method);
+                        byte[] lengthBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
+                        n = SessionUtils.read(socketChannel, lengthBytes);
+                        if (n < 0) {
+                            throw new EOFException(String.format("FileSession '%s' was disconnected", sessionId));
+                        }
+                        int length = SessionUtils.parseInt(lengthBytes);
+                        logger.debug("FileSession '%s' length = %d", sessionId, length);
+                        Command command = new Command(method, length, sessionId);
                         SessionOperator operator = operators.get(command.getMethod());
                         if (operator != null) {
-                            command.setSessionId(sessionId);
                             operator.operate(command, socketChannel);
                             if (socketChannel.isConnected() == false) {
                                 break;

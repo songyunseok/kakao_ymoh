@@ -5,26 +5,26 @@ import com.kakaobank.demo.ymoh.DateUtils;
 import com.kakaobank.demo.ymoh.SessionUtils;
 import com.kakaobank.demo.ymoh.fb.Operation;
 import com.kakaobank.demo.ymoh.fg.SessionOperator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.EOFException;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.FileInputStream;
+import java.io.FileFilter;
+import java.io.InputStream;
 import java.nio.channels.SocketChannel;
 import java.util.Date;
 
 @Component
-public class PushOperator implements SessionOperator {
+public class PullOperator implements SessionOperator {
 
-    private static Logger logger = LoggerFactory.getLogger(PushOperator.class);
+    private static Logger logger = LoggerFactory.getLogger(PullOperator.class);
 
     @Override
     public String getSupportedMethod() {
-        return "PUSH";
+        return "PULL";
     }
 
     @Override
@@ -32,23 +32,35 @@ public class PushOperator implements SessionOperator {
         byte[] requestBytes = new byte[command.getLength()];
         int n = SessionUtils.read(socketChannel, requestBytes);
         if (n < 0) {
-            throw new EOFException(String.format("PushOperator '%s' was disconnected", command.getSessionId()));
+            throw new EOFException(String.format("PullOperator '%s' was disconnected", command.getSessionId()));
         }
-        Operation.PushRequest request = Operation.PushRequest.parseFrom(requestBytes);
+        Operation.PullRequest request = Operation.PullRequest.parseFrom(requestBytes);
         String token = request.getToken();
-        long length = request.getLength();
         String status = "OK";
         String reason = "";
         try {
+            File inputFile = null;
             try {
-                //TODO validate
+                File parent = new File(System.getProperty("user.dir"));
+                File files [] = parent.listFiles(new FileFilter() {
+                    @Override
+                    public boolean accept(File pathname) {
+                        return pathname.isFile() && pathname.isHidden() == false;
+                    }
+                });
+                if (files != null && files.length > 0) {
+                    inputFile = files[0];
+                }
             } catch (Exception ex) {
                 status = "FAIL";
                 reason = ex.getMessage();
                 logger.warn("Failed to validate push request", ex.getMessage());
             }
-            Operation.SessionResponse resp = Operation.SessionResponse.newBuilder()
+            Operation.PullResponse resp = Operation.PullResponse.newBuilder()
                     .setToken(token)
+                    .setFileName(inputFile != null ? inputFile.getName() : "")
+                    .setLength(inputFile != null ? inputFile.length() : 0)
+
                     .setStatus(status)
                     .setReason(reason)
                     .build();
@@ -57,24 +69,14 @@ public class PushOperator implements SessionOperator {
             SessionUtils.putInt(sizeBytes, respBytes.length);
             SessionUtils.write(socketChannel, sizeBytes);
             SessionUtils.write(socketChannel, respBytes);
-            if (status.equals("OK")) {
-                /*byte[] tokenBytes = new byte[SessionUtils.OP_TOKEN_SIZE];
-                n = SessionUtils.read(socketChannel, tokenBytes);
-                if (n < 0) {
-                    throw new EOFException(String.format("PushOperator '%s' was disconnected", command.getSessionId()));
-                }
-                SessionUtils.parseString(tokenBytes);*/
-                File parent = new File(System.getProperty("user.dir"));
-                File tempFile = null;
-                OutputStream outputStream = null;
+            if (status.equals("OK") && inputFile != null) {
+                InputStream inputStream = null;
                 try {
-                    tempFile = File.createTempFile("push_" + DateUtils.formatDate(new Date()) + "_", ".tmp");
-                    outputStream = new FileOutputStream(tempFile);
-                    long len = SessionUtils.read(socketChannel, length, outputStream);
+                    inputStream = new FileInputStream(inputFile);
+                    long len = SessionUtils.write(socketChannel, inputStream);
                     if (len < 0) {
-                        throw new EOFException(String.format("PushOperator '%s' was disconnected", command.getSessionId()));
+                        throw new EOFException(String.format("PullOperator '%s' was disconnected", command.getSessionId()));
                     }
-                    outputStream.flush();
                     status = "OK";
                     reason = "";
                 } catch (Exception ex) {
@@ -83,28 +85,29 @@ public class PushOperator implements SessionOperator {
                     logger.warn("Failed to write a pushed file", ex.getMessage());
                 } finally {
                     try {
-                        if (outputStream != null) {
-                            outputStream.close();
+                        if (inputStream != null) {
+                            inputStream.close();
                         }
-                        if (tempFile != null) {
+                        if (inputFile != null) {
                             if (status.equals("OK")) {
-                                File dest = new File(parent, request.getFileName());
-                                tempFile.renameTo(dest);
+                                //File dest = new File(".done", resp.getFileName());
+                                //inputFile.renameTo(dest);
+                                inputFile.delete();
                             } else {
-                                tempFile.delete();
+                                //inputFile.delete();
                             }
                         }
                     } catch (Exception ex) {
                         status = "FAIL";
                         reason = ex.getMessage();
-                        logger.warn("Failed to close a pushed file", ex.getMessage());
+                        logger.warn("Failed to close a pulled file", ex.getMessage());
                     }
-                    resp = Operation.SessionResponse.newBuilder()
+                    Operation.SessionResponse reply = Operation.SessionResponse.newBuilder()
                             .setToken(token)
                             .setStatus(status)
                             .setReason(reason)
                             .build();
-                    respBytes = resp.toByteArray();
+                    respBytes = reply.toByteArray();
                     sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
                     SessionUtils.putInt(sizeBytes, respBytes.length);
                     SessionUtils.write(socketChannel, sizeBytes);

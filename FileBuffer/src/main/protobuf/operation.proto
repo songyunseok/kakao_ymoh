@@ -2,17 +2,17 @@ syntax = "proto2";
 
 package com.kakaobank.demo.ymoh.fb;
 
-message FileHeader {
+message PushRequest {
 
-	required string uid = 1;
+	required string token = 1;
 
-	required string logicalFileName = 2;
+    required string user = 2;
 
-	required int64 length = 3;
+	required string fileName = 3;
 
-	optional string host = 4;
+	required int64 length = 4;
 
-	optional string user = 5;
+	optional string path = 5;
 
 	optional string date = 6;
 
@@ -20,6 +20,52 @@ message FileHeader {
 
 	optional string checkSum = 8;
 
-	optional string status = 9;
+	optional string signature = 9;
+
+}
+
+message SessionResponse {
+
+    required string token = 1;
+
+    required string status = 2;
+
+    optional string reason = 3;
+
+}
+
+message PullRequest {
+
+    required string token = 1;
+
+    required string user = 2;
+
+    optional string path = 3;
+
+    optional string signature = 4;
+
+}
+
+message PullResponse {
+
+    required string token = 1;
+
+	required string fileName = 2;
+
+	required int64 length = 3;
+
+	optional string path = 4;
+
+	optional string date = 5;
+
+	optional string time = 6;
+
+	optional string status = 7;
+
+	optional string reason = 8;
+
+	optional string checkSum = 9;
+
+	optional string signature = 10;
 
 }
