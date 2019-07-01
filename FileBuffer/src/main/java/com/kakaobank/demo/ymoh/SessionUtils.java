@@ -1,6 +1,6 @@
 package com.kakaobank.demo.ymoh;
 
-import java.io.IOException;
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -105,12 +105,12 @@ public class SessionUtils {
         while (buf.hasRemaining()) {
             written = socketChannel.write(buf);
             if (written < 0) {
-                throw new IOException("Socket output has been broken");
+                throw new EOFException("Socket output has been broken");
             } else if (written == 0) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException ex) {
-                   throw new IOException("Socket output has been interrupted");
+                   throw new EOFException("Socket output has been interrupted");
                 }
             } else {
                 numBytesWritten += written;
@@ -132,12 +132,12 @@ public class SessionUtils {
             while (buf.hasRemaining()) {
                 written = socketChannel.write(buf);
                 if (written < 0) {
-                    throw new IOException("Socket output has been broken");
+                    throw new EOFException("Socket output has been broken");
                 } else if (written == 0) {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException ex) {
-                        throw new IOException("Socket output has been interrupted");
+                        throw new EOFException("Socket output has been interrupted");
                     }
                 } else {
                     numBytesWritten += written;

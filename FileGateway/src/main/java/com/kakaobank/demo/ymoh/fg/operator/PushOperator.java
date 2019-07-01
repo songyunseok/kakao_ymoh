@@ -77,10 +77,13 @@ public class PushOperator implements SessionOperator {
                     outputStream.flush();
                     status = "OK";
                     reason = "";
+                } catch (EOFException ex) {
+                    status = "";
+                    logger.warn("Failed to stream a pushed file", ex.getMessage());
                 } catch (Exception ex) {
                     status = "FAIL";
                     reason = ex.getMessage();
-                    logger.warn("Failed to write a pushed file", ex.getMessage());
+                    logger.warn("Failed to stream a pushed file", ex.getMessage());
                 } finally {
                     try {
                         if (outputStream != null) {
@@ -95,20 +98,21 @@ public class PushOperator implements SessionOperator {
                             }
                         }
                     } catch (Exception ex) {
-                        status = "FAIL";
-                        reason = ex.getMessage();
+                        status = "";
                         logger.warn("Failed to close a pushed file", ex.getMessage());
                     }
-                    resp = Operation.SessionResponse.newBuilder()
-                            .setToken(token)
-                            .setStatus(status)
-                            .setReason(reason)
-                            .build();
-                    respBytes = resp.toByteArray();
-                    sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
-                    SessionUtils.putInt(sizeBytes, respBytes.length);
-                    SessionUtils.write(socketChannel, sizeBytes);
-                    SessionUtils.write(socketChannel, respBytes);
+                    if (status.isEmpty() == false) {
+                        resp = Operation.SessionResponse.newBuilder()
+                                .setToken(token)
+                                .setStatus(status)
+                                .setReason(reason)
+                                .build();
+                        respBytes = resp.toByteArray();
+                        sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
+                        SessionUtils.putInt(sizeBytes, respBytes.length);
+                        SessionUtils.write(socketChannel, sizeBytes);
+                        SessionUtils.write(socketChannel, respBytes);
+                    }
                 }
             }
         } finally {
