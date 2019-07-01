@@ -1,0 +1,25 @@
+syntax = "proto2";
+
+package com.kakaobank.demo.ymoh.fb;
+
+message FileHeader {
+
+	required string uid = 1;
+
+	required string logicalFileName = 2;
+
+	required int64 length = 3;
+
+	optional string host = 4;
+
+	optional string user = 5;
+
+	optional string date = 6;
+
+	optional string time = 7;
+
+	optional string checkSum = 8;
+
+	optional string status = 9;
+
+}
