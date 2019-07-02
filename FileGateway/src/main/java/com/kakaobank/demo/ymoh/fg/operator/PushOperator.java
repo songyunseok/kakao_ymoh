@@ -50,8 +50,8 @@ public class PushOperator implements SessionOperator {
             throw new EOFException(String.format("PushOperator '%s' was disconnected", command.getSessionId()));
         }
 
-        File homeDir = new File(System.getProperty("user.dir"));
-        File parentDir = null;
+        File userDir = new File(System.getProperty("user.dir"));
+        File homeDir = null;
 
         Operation.PushRequest request = Operation.PushRequest.parseFrom(requestBytes);
         String token = request.getToken();
@@ -81,16 +81,16 @@ public class PushOperator implements SessionOperator {
                 if (homePath == null || homePath.length() == 0) {
                     throw new SessionException(String.format("Home path [%s] is not found", homePath));
                 }
-                parentDir = new File(homeDir, homePath);
-                if (parentDir.exists() == false) {
-                    if (parentDir.mkdirs() == false) {
-                        throw new SessionException(String.format("Parent directory [%s] is not accessible", parentDir.getAbsolutePath()));
+                homeDir = new File(userDir, homePath);
+                if (homeDir.exists() == false) {
+                    if (homeDir.mkdirs() == false) {
+                        throw new SessionException(String.format("Parent directory [%s] is not accessible", homeDir.getAbsolutePath()));
                     }
                 }
                 if (path != null && path.length() > 0) {
-                    parentDir = new File(parentDir, path);
-                    if (parentDir.mkdirs() == false) {
-                        throw new SessionException(String.format("Parent directory [%s] is not accessible", parentDir.getAbsolutePath()));
+                    homeDir = new File(homeDir, path);
+                    if (homeDir.mkdirs() == false) {
+                        throw new SessionException(String.format("Parent directory [%s] is not accessible", homeDir.getAbsolutePath()));
                     }
                 }
             } catch (Exception ex) {
@@ -135,7 +135,7 @@ public class PushOperator implements SessionOperator {
                         }
                         if (tempFile != null) {
                             if (status.equals("OK")) {
-                                File dest = new File(parentDir, fileName);
+                                File dest = new File(homeDir, fileName);
                                 tempFile.renameTo(dest);
                             } else {
                                 tempFile.delete();
