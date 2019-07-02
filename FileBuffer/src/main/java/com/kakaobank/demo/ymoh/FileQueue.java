@@ -10,6 +10,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class FileQueue {
 
+    public enum CommitMode {
+        MOVE,
+        DELETE,
+    }
+
     private Lock lock = new ReentrantLock();
 
     private List<String> tokens = new ArrayList<>();
@@ -96,10 +101,14 @@ public class FileQueue {
     }
 
     public void commit(String token) {
+        commit(token, CommitMode.DELETE);
+    }
+
+    public void commit(String token, CommitMode mode) {
         lock.lock();
         try {
             pending.remove(token);
-            files.remove(token);
+            File file = files.remove(token);
             int index = -1;
             for (int i = 0; i < tokens.size(); i++) {
                 if (tokens.get(i).equals(token)) {
@@ -109,6 +118,21 @@ public class FileQueue {
             }
             if (index > 0) {
                 tokens.remove(index);
+            }
+            if (file != null) {
+                switch (mode) {
+                    case DELETE:
+                        file.delete();
+                        break;
+                    case MOVE:
+                        File parent = file.getParentFile();
+                        File doneDir = new File(parent, ".done");
+                        if (doneDir.exists() == false) {
+                            doneDir.mkdir();
+                        }
+                        file.renameTo(new File(doneDir, file.getName()));
+                        break;
+                }
             }
         } finally {
             lock.unlock();

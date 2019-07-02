@@ -2722,57 +2722,43 @@ public final class Operation {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required string token = 1;</code>
-     */
-    boolean hasToken();
-    /**
-     * <code>required string token = 1;</code>
-     */
-    java.lang.String getToken();
-    /**
-     * <code>required string token = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getTokenBytes();
-
-    /**
-     * <code>required string user = 2;</code>
+     * <code>required string user = 1;</code>
      */
     boolean hasUser();
     /**
-     * <code>required string user = 2;</code>
+     * <code>required string user = 1;</code>
      */
     java.lang.String getUser();
     /**
-     * <code>required string user = 2;</code>
+     * <code>required string user = 1;</code>
      */
     com.google.protobuf.ByteString
         getUserBytes();
 
     /**
-     * <code>optional string path = 3;</code>
+     * <code>optional string path = 2;</code>
      */
     boolean hasPath();
     /**
-     * <code>optional string path = 3;</code>
+     * <code>optional string path = 2;</code>
      */
     java.lang.String getPath();
     /**
-     * <code>optional string path = 3;</code>
+     * <code>optional string path = 2;</code>
      */
     com.google.protobuf.ByteString
         getPathBytes();
 
     /**
-     * <code>optional string signature = 4;</code>
+     * <code>optional string signature = 3;</code>
      */
     boolean hasSignature();
     /**
-     * <code>optional string signature = 4;</code>
+     * <code>optional string signature = 3;</code>
      */
     java.lang.String getSignature();
     /**
-     * <code>optional string signature = 4;</code>
+     * <code>optional string signature = 3;</code>
      */
     com.google.protobuf.ByteString
         getSignatureBytes();
@@ -2789,7 +2775,6 @@ public final class Operation {
       super(builder);
     }
     private PullRequest() {
-      token_ = "";
       user_ = "";
       path_ = "";
       signature_ = "";
@@ -2826,24 +2811,18 @@ public final class Operation {
             case 10: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000001;
-              token_ = bs;
+              user_ = bs;
               break;
             }
             case 18: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000002;
-              user_ = bs;
+              path_ = bs;
               break;
             }
             case 26: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000004;
-              path_ = bs;
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
               signature_ = bs;
               break;
             }
@@ -2872,58 +2851,16 @@ public final class Operation {
     }
 
     private int bitField0_;
-    public static final int TOKEN_FIELD_NUMBER = 1;
-    private volatile java.lang.Object token_;
+    public static final int USER_FIELD_NUMBER = 1;
+    private volatile java.lang.Object user_;
     /**
-     * <code>required string token = 1;</code>
+     * <code>required string user = 1;</code>
      */
-    public boolean hasToken() {
+    public boolean hasUser() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string token = 1;</code>
-     */
-    public java.lang.String getToken() {
-      java.lang.Object ref = token_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          token_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string token = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getTokenBytes() {
-      java.lang.Object ref = token_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        token_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int USER_FIELD_NUMBER = 2;
-    private volatile java.lang.Object user_;
-    /**
-     * <code>required string user = 2;</code>
-     */
-    public boolean hasUser() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>required string user = 2;</code>
+     * <code>required string user = 1;</code>
      */
     public java.lang.String getUser() {
       java.lang.Object ref = user_;
@@ -2940,7 +2877,7 @@ public final class Operation {
       }
     }
     /**
-     * <code>required string user = 2;</code>
+     * <code>required string user = 1;</code>
      */
     public com.google.protobuf.ByteString
         getUserBytes() {
@@ -2956,16 +2893,16 @@ public final class Operation {
       }
     }
 
-    public static final int PATH_FIELD_NUMBER = 3;
+    public static final int PATH_FIELD_NUMBER = 2;
     private volatile java.lang.Object path_;
     /**
-     * <code>optional string path = 3;</code>
+     * <code>optional string path = 2;</code>
      */
     public boolean hasPath() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional string path = 3;</code>
+     * <code>optional string path = 2;</code>
      */
     public java.lang.String getPath() {
       java.lang.Object ref = path_;
@@ -2982,7 +2919,7 @@ public final class Operation {
       }
     }
     /**
-     * <code>optional string path = 3;</code>
+     * <code>optional string path = 2;</code>
      */
     public com.google.protobuf.ByteString
         getPathBytes() {
@@ -2998,16 +2935,16 @@ public final class Operation {
       }
     }
 
-    public static final int SIGNATURE_FIELD_NUMBER = 4;
+    public static final int SIGNATURE_FIELD_NUMBER = 3;
     private volatile java.lang.Object signature_;
     /**
-     * <code>optional string signature = 4;</code>
+     * <code>optional string signature = 3;</code>
      */
     public boolean hasSignature() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string signature = 4;</code>
+     * <code>optional string signature = 3;</code>
      */
     public java.lang.String getSignature() {
       java.lang.Object ref = signature_;
@@ -3024,7 +2961,7 @@ public final class Operation {
       }
     }
     /**
-     * <code>optional string signature = 4;</code>
+     * <code>optional string signature = 3;</code>
      */
     public com.google.protobuf.ByteString
         getSignatureBytes() {
@@ -3046,10 +2983,6 @@ public final class Operation {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasToken()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       if (!hasUser()) {
         memoizedIsInitialized = 0;
         return false;
@@ -3061,16 +2994,13 @@ public final class Operation {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, token_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, user_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, user_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, path_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, path_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, signature_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, signature_);
       }
       unknownFields.writeTo(output);
     }
@@ -3081,16 +3011,13 @@ public final class Operation {
 
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, token_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, user_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, user_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, path_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, path_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, signature_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, signature_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3109,11 +3036,6 @@ public final class Operation {
       com.kakaobank.demo.ymoh.fb.Operation.PullRequest other = (com.kakaobank.demo.ymoh.fb.Operation.PullRequest) obj;
 
       boolean result = true;
-      result = result && (hasToken() == other.hasToken());
-      if (hasToken()) {
-        result = result && getToken()
-            .equals(other.getToken());
-      }
       result = result && (hasUser() == other.hasUser());
       if (hasUser()) {
         result = result && getUser()
@@ -3140,10 +3062,6 @@ public final class Operation {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasToken()) {
-        hash = (37 * hash) + TOKEN_FIELD_NUMBER;
-        hash = (53 * hash) + getToken().hashCode();
-      }
       if (hasUser()) {
         hash = (37 * hash) + USER_FIELD_NUMBER;
         hash = (53 * hash) + getUser().hashCode();
@@ -3274,14 +3192,12 @@ public final class Operation {
       }
       public Builder clear() {
         super.clear();
-        token_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
         user_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         path_ = "";
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         signature_ = "";
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -3309,17 +3225,13 @@ public final class Operation {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.token_ = token_;
+        result.user_ = user_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.user_ = user_;
+        result.path_ = path_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
-        }
-        result.path_ = path_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
         }
         result.signature_ = signature_;
         result.bitField0_ = to_bitField0_;
@@ -3364,23 +3276,18 @@ public final class Operation {
 
       public Builder mergeFrom(com.kakaobank.demo.ymoh.fb.Operation.PullRequest other) {
         if (other == com.kakaobank.demo.ymoh.fb.Operation.PullRequest.getDefaultInstance()) return this;
-        if (other.hasToken()) {
-          bitField0_ |= 0x00000001;
-          token_ = other.token_;
-          onChanged();
-        }
         if (other.hasUser()) {
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000001;
           user_ = other.user_;
           onChanged();
         }
         if (other.hasPath()) {
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000002;
           path_ = other.path_;
           onChanged();
         }
         if (other.hasSignature()) {
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000004;
           signature_ = other.signature_;
           onChanged();
         }
@@ -3390,9 +3297,6 @@ public final class Operation {
       }
 
       public final boolean isInitialized() {
-        if (!hasToken()) {
-          return false;
-        }
         if (!hasUser()) {
           return false;
         }
@@ -3418,91 +3322,15 @@ public final class Operation {
       }
       private int bitField0_;
 
-      private java.lang.Object token_ = "";
+      private java.lang.Object user_ = "";
       /**
-       * <code>required string token = 1;</code>
+       * <code>required string user = 1;</code>
        */
-      public boolean hasToken() {
+      public boolean hasUser() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string token = 1;</code>
-       */
-      public java.lang.String getToken() {
-        java.lang.Object ref = token_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            token_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>required string token = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getTokenBytes() {
-        java.lang.Object ref = token_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          token_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string token = 1;</code>
-       */
-      public Builder setToken(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        token_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string token = 1;</code>
-       */
-      public Builder clearToken() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        token_ = getDefaultInstance().getToken();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string token = 1;</code>
-       */
-      public Builder setTokenBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        token_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object user_ = "";
-      /**
-       * <code>required string user = 2;</code>
-       */
-      public boolean hasUser() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required string user = 2;</code>
+       * <code>required string user = 1;</code>
        */
       public java.lang.String getUser() {
         java.lang.Object ref = user_;
@@ -3519,7 +3347,7 @@ public final class Operation {
         }
       }
       /**
-       * <code>required string user = 2;</code>
+       * <code>required string user = 1;</code>
        */
       public com.google.protobuf.ByteString
           getUserBytes() {
@@ -3535,36 +3363,36 @@ public final class Operation {
         }
       }
       /**
-       * <code>required string user = 2;</code>
+       * <code>required string user = 1;</code>
        */
       public Builder setUser(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000001;
         user_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string user = 2;</code>
+       * <code>required string user = 1;</code>
        */
       public Builder clearUser() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         user_ = getDefaultInstance().getUser();
         onChanged();
         return this;
       }
       /**
-       * <code>required string user = 2;</code>
+       * <code>required string user = 1;</code>
        */
       public Builder setUserBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000001;
         user_ = value;
         onChanged();
         return this;
@@ -3572,13 +3400,13 @@ public final class Operation {
 
       private java.lang.Object path_ = "";
       /**
-       * <code>optional string path = 3;</code>
+       * <code>optional string path = 2;</code>
        */
       public boolean hasPath() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional string path = 3;</code>
+       * <code>optional string path = 2;</code>
        */
       public java.lang.String getPath() {
         java.lang.Object ref = path_;
@@ -3595,7 +3423,7 @@ public final class Operation {
         }
       }
       /**
-       * <code>optional string path = 3;</code>
+       * <code>optional string path = 2;</code>
        */
       public com.google.protobuf.ByteString
           getPathBytes() {
@@ -3611,36 +3439,36 @@ public final class Operation {
         }
       }
       /**
-       * <code>optional string path = 3;</code>
+       * <code>optional string path = 2;</code>
        */
       public Builder setPath(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000002;
         path_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string path = 3;</code>
+       * <code>optional string path = 2;</code>
        */
       public Builder clearPath() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         path_ = getDefaultInstance().getPath();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string path = 3;</code>
+       * <code>optional string path = 2;</code>
        */
       public Builder setPathBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000002;
         path_ = value;
         onChanged();
         return this;
@@ -3648,13 +3476,13 @@ public final class Operation {
 
       private java.lang.Object signature_ = "";
       /**
-       * <code>optional string signature = 4;</code>
+       * <code>optional string signature = 3;</code>
        */
       public boolean hasSignature() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional string signature = 4;</code>
+       * <code>optional string signature = 3;</code>
        */
       public java.lang.String getSignature() {
         java.lang.Object ref = signature_;
@@ -3671,7 +3499,7 @@ public final class Operation {
         }
       }
       /**
-       * <code>optional string signature = 4;</code>
+       * <code>optional string signature = 3;</code>
        */
       public com.google.protobuf.ByteString
           getSignatureBytes() {
@@ -3687,36 +3515,36 @@ public final class Operation {
         }
       }
       /**
-       * <code>optional string signature = 4;</code>
+       * <code>optional string signature = 3;</code>
        */
       public Builder setSignature(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000008;
+  bitField0_ |= 0x00000004;
         signature_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string signature = 4;</code>
+       * <code>optional string signature = 3;</code>
        */
       public Builder clearSignature() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000004);
         signature_ = getDefaultInstance().getSignature();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string signature = 4;</code>
+       * <code>optional string signature = 3;</code>
        */
       public Builder setSignatureBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000008;
+  bitField0_ |= 0x00000004;
         signature_ = value;
         onChanged();
         return this;
@@ -5778,14 +5606,13 @@ public final class Operation {
       " \002(\003\022\014\n\004path\030\005 \001(\t\022\014\n\004date\030\006 \001(\t\022\014\n\004time" +
       "\030\007 \001(\t\022\020\n\010checkSum\030\010 \001(\t\022\021\n\tsignature\030\t " +
       "\001(\t\"@\n\017SessionResponse\022\r\n\005token\030\001 \002(\t\022\016\n" +
-      "\006status\030\002 \002(\t\022\016\n\006reason\030\003 \001(\t\"K\n\013PullReq" +
-      "uest\022\r\n\005token\030\001 \002(\t\022\014\n\004user\030\002 \002(\t\022\014\n\004pat" +
-      "h\030\003 \001(\t\022\021\n\tsignature\030\004 \001(\t\"\256\001\n\014PullRespo" +
-      "nse\022\r\n\005token\030\001 \002(\t\022\020\n\010fileName\030\002 \002(\t\022\016\n\006",
-      "length\030\003 \002(\003\022\014\n\004path\030\004 \001(\t\022\014\n\004date\030\005 \001(\t" +
-      "\022\014\n\004time\030\006 \001(\t\022\016\n\006status\030\007 \001(\t\022\016\n\006reason" +
-      "\030\010 \001(\t\022\020\n\010checkSum\030\t \001(\t\022\021\n\tsignature\030\n " +
-      "\001(\t"
+      "\006status\030\002 \002(\t\022\016\n\006reason\030\003 \001(\t\"<\n\013PullReq" +
+      "uest\022\014\n\004user\030\001 \002(\t\022\014\n\004path\030\002 \001(\t\022\021\n\tsign" +
+      "ature\030\003 \001(\t\"\256\001\n\014PullResponse\022\r\n\005token\030\001 " +
+      "\002(\t\022\020\n\010fileName\030\002 \002(\t\022\016\n\006length\030\003 \002(\003\022\014\n",
+      "\004path\030\004 \001(\t\022\014\n\004date\030\005 \001(\t\022\014\n\004time\030\006 \001(\t\022" +
+      "\016\n\006status\030\007 \001(\t\022\016\n\006reason\030\010 \001(\t\022\020\n\010check" +
+      "Sum\030\t \001(\t\022\021\n\tsignature\030\n \001(\t"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5816,7 +5643,7 @@ public final class Operation {
     internal_static_com_kakaobank_demo_ymoh_fb_PullRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_kakaobank_demo_ymoh_fb_PullRequest_descriptor,
-        new java.lang.String[] { "Token", "User", "Path", "Signature", });
+        new java.lang.String[] { "User", "Path", "Signature", });
     internal_static_com_kakaobank_demo_ymoh_fb_PullResponse_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_com_kakaobank_demo_ymoh_fb_PullResponse_fieldAccessorTable = new

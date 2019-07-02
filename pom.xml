@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.kakaobank.demo</groupId>
-    <artifactId>ymoh</artifactId>
+    <artifactId>kakaobank-demo-ymoh-parent</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 

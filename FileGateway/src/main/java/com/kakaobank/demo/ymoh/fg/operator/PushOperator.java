@@ -4,10 +4,13 @@ import com.kakaobank.demo.ymoh.DateUtils;
 import com.kakaobank.demo.ymoh.SessionUtils;
 import com.kakaobank.demo.ymoh.fb.Operation;
 import com.kakaobank.demo.ymoh.fg.SessionCommand;
+import com.kakaobank.demo.ymoh.fg.SessionException;
 import com.kakaobank.demo.ymoh.fg.SessionOperator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.EOFException;
@@ -17,10 +20,22 @@ import java.io.OutputStream;
 import java.nio.channels.SocketChannel;
 import java.util.Date;
 
+/*
+ * 1. Receive PushRequest from a FileTransfer (FT)
+ *  FT --> 'PUSH' (32 bytes) + length of PushRequest (6 bytes)
+ *  FT --> PushRequest (n bytes)
+ *  FT <-- length of SessionResponse (6 bytes) + SessionResponse (n bytes)
+ * 2. (Optional) Receive a file stream depending whether the previous SessionStatus has OK status
+ *  FT --> file stream (n bytes)
+ *  FT <-- length of SessionResponse (6 bytes) + SessionResponse (n bytes)
+ */
 @Component
 public class PushOperator implements SessionOperator {
 
     private static Logger logger = LoggerFactory.getLogger(PushOperator.class);
+
+    @Autowired
+    private Environment env;
 
     @Override
     public String getSupportedMethod() {
@@ -34,14 +49,50 @@ public class PushOperator implements SessionOperator {
         if (n < 0) {
             throw new EOFException(String.format("PushOperator '%s' was disconnected", command.getSessionId()));
         }
+
+        File homeDir = new File(System.getProperty("user.dir"));
+        File parentDir = null;
+
         Operation.PushRequest request = Operation.PushRequest.parseFrom(requestBytes);
         String token = request.getToken();
+        String user = request.getUser();
+        String fileName = request.getFileName();
         long length = request.getLength();
+        String path = request.getPath();
+        String checkSum = request.getCheckSum();
+        String signature = request.getSignature();
         String status = "OK";
         String reason = "";
         try {
             try {
-                //TODO validate
+                if (token == null || token.length() == 0) {
+                    throw new SessionException("Token is mandatory");
+                }
+                if (user == null || user.length() == 0) {
+                    throw new SessionException("User is mandatory");
+                }
+                if (fileName == null || fileName.length() == 0) {
+                    throw new SessionException("FileName is mandatory");
+                }
+                if (length <= 0) {
+                    throw new SessionException("Length must be greater than 0");
+                }
+                String homePath = env.getProperty(user + ".push.home");
+                if (homePath == null || homePath.length() == 0) {
+                    throw new SessionException(String.format("Home path [%s] is not found", homePath));
+                }
+                parentDir = new File(homeDir, homePath);
+                if (parentDir.exists() == false) {
+                    if (parentDir.mkdirs() == false) {
+                        throw new SessionException(String.format("Parent directory [%s] is not accessible", parentDir.getAbsolutePath()));
+                    }
+                }
+                if (path != null && path.length() > 0) {
+                    parentDir = new File(parentDir, path);
+                    if (parentDir.mkdirs() == false) {
+                        throw new SessionException(String.format("Parent directory [%s] is not accessible", parentDir.getAbsolutePath()));
+                    }
+                }
             } catch (Exception ex) {
                 status = "FAIL";
                 reason = ex.getMessage();
@@ -58,13 +109,6 @@ public class PushOperator implements SessionOperator {
             SessionUtils.write(socketChannel, sizeBytes);
             SessionUtils.write(socketChannel, respBytes);
             if (status.equals("OK")) {
-                /*byte[] tokenBytes = new byte[SessionUtils.OP_TOKEN_SIZE];
-                n = SessionUtils.read(socketChannel, tokenBytes);
-                if (n < 0) {
-                    throw new EOFException(String.format("PushOperator '%s' was disconnected", command.getSessionId()));
-                }
-                SessionUtils.parseString(tokenBytes);*/
-                File parent = new File(System.getProperty("user.dir"));
                 File tempFile = null;
                 OutputStream outputStream = null;
                 try {
@@ -91,7 +135,7 @@ public class PushOperator implements SessionOperator {
                         }
                         if (tempFile != null) {
                             if (status.equals("OK")) {
-                                File dest = new File(parent, request.getFileName());
+                                File dest = new File(parentDir, fileName);
                                 tempFile.renameTo(dest);
                             } else {
                                 tempFile.delete();

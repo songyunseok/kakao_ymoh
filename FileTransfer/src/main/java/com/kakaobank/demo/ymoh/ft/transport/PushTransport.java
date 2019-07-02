@@ -25,7 +25,7 @@ public class PushTransport extends SocketTransport {
     @Autowired
     private FileQueueLocator locator;
 
-    public void setFile(String path) {
+    public void setPath(String path) {
         dir = new File(path);
         try {
             if (dir.exists() == false) {
@@ -45,7 +45,13 @@ public class PushTransport extends SocketTransport {
     public boolean repeat(SocketChannel socketChannel) throws Exception {
         String token = queue.nextToken();
         if (token != null) {
-            File file = queue.consume(token);
+            try {
+                File file = queue.consume(token);
+
+                queue.commit(token);
+            } catch (Exception e) {
+                queue.rollback(token);
+            }
         }
         return false;
     }

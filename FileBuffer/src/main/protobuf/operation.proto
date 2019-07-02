@@ -36,13 +36,11 @@ message SessionResponse {
 
 message PullRequest {
 
-    required string token = 1;
+    required string user = 1;
 
-    required string user = 2;
+    optional string path = 2;
 
-    optional string path = 3;
-
-    optional string signature = 4;
+    optional string signature = 3;
 
 }
 
