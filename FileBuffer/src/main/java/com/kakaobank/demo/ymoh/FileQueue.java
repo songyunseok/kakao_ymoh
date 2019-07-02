@@ -49,7 +49,7 @@ public class FileQueue {
                         token = UUID.randomUUID().toString();
                         tokens.add(token);
                         this.files.put(token, file);
-                        this.pending.put(token, tid);
+                        //this.pending.put(token, tid);
                     }
                 }
             }
