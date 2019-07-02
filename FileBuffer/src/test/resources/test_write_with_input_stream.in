@@ -1,0 +1,235 @@
+4. Writing with FileChannel
+4.1. Writing into a File Using FileChannel
+Let’s explore how to write using FileChannel:
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+@Test
+public void whenWriteWithFileChannelUsingRandomAccessFile_thenCorrect()
+  throws IOException {
+    String file = "src/test/resources/test_write_using_filechannel.txt";
+    try (RandomAccessFile writer = new RandomAccessFile(file, "rw");
+        FileChannel channel = writer.getChannel()){
+        ByteBuffer buff = ByteBuffer.wrap("Hello world".getBytes(StandardCharsets.UTF_8));
+
+        channel.write(buff);
+
+     // verify
+     RandomAccessFile reader = new RandomAccessFile(file, "r");
+     assertEquals("Hello world", reader.readLine());
+     reader.close();
+    }
+}
+4.2. Opening a FileChannel
+In order to write into a file using FileChannel, we must open it.
+
+Let’s see how to open a FileChannel using RandomAccessFile:
+
+1
+2
+RandomAccessFile writer = new RandomAccessFile(file, "rw");
+FileChannel channel = writer.getChannel();
+Mode ‘rw’ indicates that the channel is ‘open for reading and writing’.
+
+Let’s also see how to open a FileChannel using FileOutputStream:
+
+1
+2
+FileOutputStream fout = new FileOutputStream(file);
+FileChannel channel = fout.getChannel();
+4.3. Writing Data with FileChannel
+To write data with a FileChannel, we can use one of the write methods.
+
+Let’s see how to write a sequence of bytes, using a ByteBuffer to store the data:
+
+1
+2
+ByteBuffer buff = ByteBuffer.wrap("Hello world".getBytes(StandardCharsets.UTF_8));
+channel.write(buff);
+Next, we’ll see how to write a sequence of bytes, starting at a file position:
+
+1
+2
+ByteBuffer buff = ByteBuffer.wrap("Hello world".getBytes(StandardCharsets.UTF_8));
+channel.write(buff, 5);
+5. Current Position
+FileChannel allows us to get and change the position at which we are reading or writing.
+
+Let’s see how to get the current position:
+
+1
+long originalPosition = channel.position();
+Next, let’s see how to set the position:
+
+1
+2
+channel.position(5);
+assertEquals(originalPosition + 5, channel.position());
+6. Get the Size of a File
+Let’s see how to use the FileChannel.size method to get the size of a file in bytes:
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+@Test
+public void whenGetFileSize_thenCorrect()
+  throws IOException {
+    RandomAccessFile reader = new RandomAccessFile("src/test/resources/test_read.in", "r");
+    FileChannel channel = reader.getChannel();
+
+    // the original file size is 11 bytes.
+    assertEquals(11, channel.size());
+
+    channel.close();
+    reader.close();
+}
+7. Truncate a File
+Let’s understand how to use the FileChannel.truncate method to truncate a file to given size in bytes:
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+@Test
+public void whenTruncateFile_thenCorrect()
+  throws IOException {
+    String input = "this is a test input";
+
+    FileOutputStream fout = new FileOutputStream("src/test/resources/test_truncate.txt");
+    FileChannel channel = fout.getChannel();
+
+    ByteBuffer buff = ByteBuffer.wrap(input.getBytes());
+    channel.write(buff);
+    buff.flip();
+
+    channel = channel.truncate(5);
+    assertEquals(5, channel.size());
+
+    fout.close();
+    channel.close();
+}
+8. Force File Update into Storage
+An operating system may cache file changes for performance reasons, and data may be lost if the system crashes. To force file content and metadata to write to disk continuously we can use the force method:
+
+1
+channel.force(true);
+This method is guaranteed only when the file resides on a local device.
+
+9. Load a Section of a File into Memory
+Let’s see how to load a section of a file in memory using FileChannel.map. We use FileChannel.MapMode.READ_ONLY to open the file in read-only mode:
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+@Test
+public void givenFile_whenReadAFileSectionIntoMemoryWithFileChannel_thenCorrect()
+  throws IOException {
+    try (RandomAccessFile reader = new RandomAccessFile("src/test/resources/test_read.in", "r");
+        FileChannel channel = reader.getChannel();
+        ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+        MappedByteBuffer buff = channel.map(FileChannel.MapMode.READ_ONLY, 6, 5);
+
+        if(buff.hasRemaining()) {
+          byte[] data = new byte[buff.remaining()];
+          buff.get(data);
+          assertEquals("world", new String(data, StandardCharsets.UTF_8));
+        }
+    }
+}
+Similarly, we can use FileChannel.MapMode.READ_WRITE to open the file into both read and write mode.
+
+We can also use FileChannel.MapMode.PRIVATE mode, where changes do not apply to the original file.
+
+10. Lock a Section of a File
+Let’s understand how to lock a section of a file to prevent concurrent access of a section using the FileChannel.tryLock method:
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+@Test
+public void givenFile_whenWriteAFileUsingLockAFileSectionWithFileChannel_thenCorrect()
+  throws IOException {
+    try (RandomAccessFile reader = new RandomAccessFile("src/test/resources/test_read.in", "rw");
+        FileChannel channel = reader.getChannel();
+        FileLock fileLock = channel.tryLock(6, 5, Boolean.FALSE )){
+
+        //do other operations...
+
+        assertNotNull(fileLock);
+    }
+}
+The tryLock method attempts to acquire a lock on the file section. If the requested file section is already blocked by another thread, it throws an OverlappingFileLockException exception. This method also takes a boolean parameter to request either a shared lock or an exclusive lock.
+
+We should note that some operating systems may not allow a shared lock, defaulting instead to an exclusive lock.
+
+11. Closing a FileChannel
+Finally, when we are done using a FileChannel, we must close it. In our examples we have used try-with-resources.
+
+If necessary, we can close the FileChannel directly with the close method:
+
+1
+channel.close();
+12. Conclusion
+In this tutorial, we’ve seen how to use FileChannel to read and write files. In addition, we’ve explored how to read and change the file size and its current read/write location and looked at how to use FileChannels in concurrent or data critical applications.
+
+As always, the source code for the examples is available over on GitHub.

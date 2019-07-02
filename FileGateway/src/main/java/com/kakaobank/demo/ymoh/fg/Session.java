@@ -1,11 +1,13 @@
 package com.kakaobank.demo.ymoh.fg;
 
-public interface Session {
+import com.kakaobank.demo.ymoh.Server;
 
-    String start();
+public interface Session extends Server {
+
+    String getId();
 
     void addOperator(SessionOperator operator);
 
-    void stop();
+    void addListener(SessionListener listener);
 
 }

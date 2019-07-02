@@ -1,9 +1,9 @@
 package com.kakaobank.demo.ymoh.fg.operator;
 
-import com.kakaobank.demo.ymoh.Command;
 import com.kakaobank.demo.ymoh.DateUtils;
 import com.kakaobank.demo.ymoh.SessionUtils;
 import com.kakaobank.demo.ymoh.fb.Operation;
+import com.kakaobank.demo.ymoh.fg.SessionCommand;
 import com.kakaobank.demo.ymoh.fg.SessionOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class PullOperator implements SessionOperator {
     }
 
     @Override
-    public void operate(Command command, SocketChannel socketChannel) throws Exception {
+    public void operate(SessionCommand command, SocketChannel socketChannel) throws Exception {
         byte[] requestBytes = new byte[command.getLength()];
         int n = SessionUtils.read(socketChannel, requestBytes);
         if (n < 0) {
@@ -54,13 +54,15 @@ public class PullOperator implements SessionOperator {
             } catch (Exception ex) {
                 status = "FAIL";
                 reason = ex.getMessage();
-                logger.warn("Failed to validate push request", ex.getMessage());
+                logger.warn("Failed to list files", ex.getMessage());
             }
+            Date date = new Date();
             Operation.PullResponse resp = Operation.PullResponse.newBuilder()
                     .setToken(token)
                     .setFileName(inputFile != null ? inputFile.getName() : "")
                     .setLength(inputFile != null ? inputFile.length() : 0)
-
+                    .setDate(DateUtils.formatDate(date))
+                    .setTime(DateUtils.formatTime(date))
                     .setStatus(status)
                     .setReason(reason)
                     .build();
@@ -81,11 +83,11 @@ public class PullOperator implements SessionOperator {
                     reason = "";
                 } catch (EOFException ex) {
                     status = "";
-                    logger.warn("Failed to stream a pulled file", ex.getMessage());
+                    logger.warn("Failed to output a pulled file", ex.getMessage());
                 } catch (Exception ex) {
                     status = "FAIL";
                     reason = ex.getMessage();
-                    logger.warn("Failed to stream a pulled file", ex.getMessage());
+                    logger.warn("Failed to output a pulled file", ex.getMessage());
                 } finally {
                     try {
                         if (inputStream != null) {

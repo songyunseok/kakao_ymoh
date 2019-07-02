@@ -1,0 +1,124 @@
+1. Overview
+In this quick tutorial, we’ll look at the FileChannel class provided in the Java NIO library. We’ll discuss how to read and write data using FileChannel and ByteBuffer.
+
+We’ll also explore the advantages of using FileChannel and some of its other file manipulation features.
+
+2. Advantages of FileChannel
+The advantages of FileChannel include:
+
+Reading and writing at a specific position in a file
+Loading a section of a file directly into memory, which can be more efficient
+We can transfer file data from one channel to another at a faster rate
+We can lock a section of a file to restrict access by other threads
+To avoid data loss, we can force writing updates to a file immediately to storage
+3. Reading with FileChannel
+FileChannel performs faster than standard I/O when we read a large file.
+
+We should note that although part of Java NIO, FileChannel operations are blocking and do not have a non-blocking mode.
+
+3.1. Reading a File Using FileChannel
+Let’s understand how to read a file using FileChannel on a file that contains:
+
+1
+Hello world
+This test reads the file and checks it was read ok:
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+@Test
+public void givenFile_whenReadWithFileChannelUsingRandomAccessFile_thenCorrect()
+  throws IOException {
+    try (RandomAccessFile reader = new RandomAccessFile("src/test/resources/test_read.in", "r");
+        FileChannel channel = reader.getChannel();
+        ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+        int bufferSize = 1024;
+        if (bufferSize > channel.size()) {
+           bufferSize = (int) channel.size();
+        }
+        ByteBuffer buff = ByteBuffer.allocate(bufferSize);
+
+        while (channel.read(buff) > 0) {
+            out.write(buff.array(), 0, buff.position());
+            buff.clear();
+        }
+
+     String fileContent = new String(out.toByteArray(), StandardCharsets.UTF_8);
+
+     assertEquals("Hello world", fileContent);
+    }
+}
+Here we read bytes from the file using FileChannel, RandomAccessFile, and ByteBuffer.
+
+We should also note that multiple concurrent threads can use FileChannels safely. However, only one thread at a time is allowed an operation that involves updating a channel’s position or changing its file size. This blocks other threads attempting a similar operation until the previous operation completes.
+
+However, operations that provide explicit channel positions can run concurrently without being blocked.
+
+3.2. Opening a FileChannel
+In order to read a file using FileChannel, we must open it.
+
+Let’s see how to open a FileChannel using RandomAccessFile:
+
+1
+2
+RandomAccessFile reader = new RandomAccessFile(file, "r");
+FileChannel channel = reader.getChannel();
+Mode ‘r’ indicates that the channel is ‘open for reading’ only. We should note that closing a RandomAccessFile will also close the associated channel.
+
+Next, we’ll see opening a FileChannel to read a file using FileInputStream:
+
+1
+2
+FileInputStream fin= new FileInputStream(file);
+FileChannel channel = fin.getChannel();
+Similarly, closing a FileInputStream also closes the channel associated with it.
+
+3.3. Reading Data from a FileChannel
+To read the data, we can use one of the read methods.
+
+Let’s see how to read a sequence of bytes. We’ll use a ByteBuffer to hold the data:
+
+1
+2
+3
+4
+5
+ByteBuffer buff = ByteBuffer.allocate(1024);
+int noOfBytesRead = channel.read(buff);
+String fileContent = new String(buff.array(), StandardCharsets.UTF_8);
+
+assertEquals("Hello world", fileContent);
+Next, we’ll see how to read a sequence of bytes, starting at a file position:
+
+1
+2
+3
+4
+ByteBuffer buff = ByteBuffer.allocate(1024);
+int noOfBytesRead = channel.read(buff, 5);
+String fileContent = new String(buff.array(), StandardCharsets.UTF_8);
+assertEquals("world", fileContent);
+We should note the need for a Charset to decode a byte array into String.
+
+We specify the Charset with which the bytes were originally encoded. Without it, we may end up with garbled text. In particular, multi-byte encodings like UTF-8 and UTF-16 may not be able to decode an arbitrary section of the file, as some of the multi-byte characters may be incomplete.

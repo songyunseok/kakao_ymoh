@@ -1,9 +1,9 @@
 package com.kakaobank.demo.ymoh.fg.operator;
 
-import com.kakaobank.demo.ymoh.Command;
 import com.kakaobank.demo.ymoh.DateUtils;
 import com.kakaobank.demo.ymoh.SessionUtils;
 import com.kakaobank.demo.ymoh.fb.Operation;
+import com.kakaobank.demo.ymoh.fg.SessionCommand;
 import com.kakaobank.demo.ymoh.fg.SessionOperator;
 
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ public class PushOperator implements SessionOperator {
     }
 
     @Override
-    public void operate(Command command, SocketChannel socketChannel) throws Exception {
+    public void operate(SessionCommand command, SocketChannel socketChannel) throws Exception {
         byte[] requestBytes = new byte[command.getLength()];
         int n = SessionUtils.read(socketChannel, requestBytes);
         if (n < 0) {
@@ -79,11 +79,11 @@ public class PushOperator implements SessionOperator {
                     reason = "";
                 } catch (EOFException ex) {
                     status = "";
-                    logger.warn("Failed to stream a pushed file", ex.getMessage());
+                    logger.warn("Failed to input a pushed file", ex.getMessage());
                 } catch (Exception ex) {
                     status = "FAIL";
                     reason = ex.getMessage();
-                    logger.warn("Failed to stream a pushed file", ex.getMessage());
+                    logger.warn("Failed to input a pushed file", ex.getMessage());
                 } finally {
                     try {
                         if (outputStream != null) {

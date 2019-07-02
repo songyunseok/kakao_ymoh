@@ -5,7 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 public class SessionUtils {
 
@@ -17,14 +18,14 @@ public class SessionUtils {
 
     public final static int BUFFER_SIZE = 1024;
 
-    public static int read(SocketChannel socketChannel, byte[] byteArray) throws Exception {
+    public static int read(ReadableByteChannel channel, byte[] byteArray) throws Exception {
         int arrayLength = byteArray.length;
         ByteBuffer buffer = ByteBuffer.allocate(arrayLength);
         int length = 0;
         while (length < arrayLength) {
-            int n = socketChannel.read(buffer);
+            int n = channel.read(buffer);
             if (n < 0) {
-                return n;
+                break;
             } else if (n == 0) {
                 try {
                     Thread.sleep(10);
@@ -40,18 +41,29 @@ public class SessionUtils {
         return length;
     }
 
-    public static long read(SocketChannel socketChannel, long length, OutputStream outputStream) throws Exception {
+    public static long read(ReadableByteChannel channel, long length, OutputStream outputStream) throws Exception {
+        return read(channel, length, outputStream, false);
+    }
+
+    public static long read(ReadableByteChannel channel, long length, OutputStream outputStream, boolean ignoreEOF) throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
         byte[] byteArray = new byte[BUFFER_SIZE];
         long numBytesRead = 0;
         int len = 0;
+        int limit = 0;
         loop: while (numBytesRead < length) {
             buffer.clear();
             len = 0;
-            while (len < BUFFER_SIZE) {
-                int n = socketChannel.read(buffer);
+            limit = (numBytesRead + BUFFER_SIZE) < length ? BUFFER_SIZE : (int)(length - numBytesRead);
+            buffer.limit(limit);
+            while (len < limit) {
+                int n = channel.read(buffer);
                 if (n < 0) {
-                    return n;
+                    if (ignoreEOF == false) {
+                        return n;
+                    } else {
+                        break loop;
+                    }
                 } else if (n == 0) {
                     try {
                         Thread.sleep(10);
@@ -65,6 +77,7 @@ public class SessionUtils {
             buffer.flip();
             buffer.get(byteArray, 0, len);
             outputStream.write(byteArray, 0, len);
+            numBytesRead += len;
         }
         return numBytesRead;
     }
@@ -96,21 +109,21 @@ public class SessionUtils {
         return -1;
     }*/
 
-    public static int write(SocketChannel socketChannel, byte[] byteArray) throws Exception {
+    public static int write(WritableByteChannel channel, byte[] byteArray) throws Exception {
         ByteBuffer buf = ByteBuffer.allocate(byteArray.length);
         buf.put(byteArray);
         buf.flip();
         int numBytesWritten = 0;
         int written = 0;
         while (buf.hasRemaining()) {
-            written = socketChannel.write(buf);
+            written = channel.write(buf);
             if (written < 0) {
-                throw new EOFException("Socket output has been broken");
+                throw new EOFException("Channel output stream was broken");
             } else if (written == 0) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException ex) {
-                   throw new EOFException("Socket output has been interrupted");
+                   throw new EOFException("Channel output stream has been interrupted");
                 }
             } else {
                 numBytesWritten += written;
@@ -119,7 +132,7 @@ public class SessionUtils {
         return numBytesWritten;
     }
 
-    public static long write(SocketChannel socketChannel, InputStream inputStream) throws Exception {
+    public static long write(WritableByteChannel channel, InputStream inputStream) throws Exception {
         ByteBuffer buf = ByteBuffer.allocate(BUFFER_SIZE);
         byte[] byteArray = new byte[BUFFER_SIZE];
         int length = 0;
@@ -130,14 +143,14 @@ public class SessionUtils {
             buf.put(byteArray, 0, length);
             buf.flip();
             while (buf.hasRemaining()) {
-                written = socketChannel.write(buf);
+                written = channel.write(buf);
                 if (written < 0) {
-                    throw new EOFException("Socket output has been broken");
+                    throw new EOFException("Channel output stream was broken");
                 } else if (written == 0) {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException ex) {
-                        throw new EOFException("Socket output has been interrupted");
+                        throw new EOFException("Channel output stream has been interrupted");
                     }
                 } else {
                     numBytesWritten += written;

@@ -1,6 +1,6 @@
-package com.kakaobank.demo.ymoh;
+package com.kakaobank.demo.ymoh.fg;
 
-public class Command implements java.io.Serializable {
+public class SessionCommand implements java.io.Serializable {
 
     private String method;
 
@@ -8,11 +8,11 @@ public class Command implements java.io.Serializable {
 
     private String sessionId;
 
-    public Command() {
+    public SessionCommand() {
         super();
     }
 
-    public Command(String method, int length, String sessionId) {
+    public SessionCommand(String method, int length, String sessionId) {
         this();
         this.method = method;
         this.length = length;

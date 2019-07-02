@@ -11,6 +11,24 @@
 
     <groupId>com.kakaobank.demo.ymoh</groupId>
     <artifactId>FileTransfer</artifactId>
+    <packaging>jar</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.kakaobank.demo.ymoh</groupId>
+            <artifactId>FileBuffer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Package as an executable jar/war -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
