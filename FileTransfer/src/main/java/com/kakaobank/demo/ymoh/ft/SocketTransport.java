@@ -1,6 +1,7 @@
 package com.kakaobank.demo.ymoh.ft;
 
 import com.kakaobank.demo.ymoh.Server;
+import com.kakaobank.demo.ymoh.ServerBase;
 import com.kakaobank.demo.ymoh.SessionUtils;
 import com.kakaobank.demo.ymoh.fb.Operation;
 import org.slf4j.Logger;
@@ -12,16 +13,10 @@ import org.springframework.core.env.Environment;
 import java.io.EOFException;
 import java.io.File;
 import java.net.InetSocketAddress;
-//import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-public abstract class SocketTransport implements Server {
+public abstract class SocketTransport extends ServerBase implements Server {
 
     private static Logger logger = LoggerFactory.getLogger(SocketTransport.class);
 
@@ -33,17 +28,7 @@ public abstract class SocketTransport implements Server {
 
     //private SocketChannel socketChannel;
 
-    private AtomicBoolean running = new AtomicBoolean(false);
-
-    private AtomicBoolean interrupted = new AtomicBoolean(false);
-
-    private Lock lock = new ReentrantLock();
-
-    private Condition cv = lock.newCondition();
-
     protected File homeDir;
-
-    protected String name;
 
     protected String user;
 
@@ -51,6 +36,8 @@ public abstract class SocketTransport implements Server {
 
     @Autowired
     private Environment env;
+
+    public void setIdentifier(String identifier) { this.identifier = identifier; }
 
     @Value("${gateway.host:localhost}")
     public void setHost(String host) {
@@ -61,8 +48,6 @@ public abstract class SocketTransport implements Server {
     public void setPort(int port) {
         this.port = port;
     }
-
-    public void setName(String name) { this.name = name; }
 
     public void setUser(String user) { this.user = user; }
 
@@ -89,72 +74,62 @@ public abstract class SocketTransport implements Server {
     }
 
     @Override
-    public void start() {
-        if (running.get()) {
-            logger.warn("{}: SocketTransport is already running", name);
-            return;
-        }
+    protected Logger logger() {
+        return logger;
+    }
+
+    @Override
+    protected void doStart() {
         resolveHomeDir();
-        Thread t = new Thread(() -> {
-            running.set(true);
-            logger.info("{}: Running SocketTransport", name);
-            //interrupted.set(false);
-            SocketChannel socketChannel = null;
-            lock.lock();
-            try {
-                //selector = Selector.open();
-                InetSocketAddress addr = new InetSocketAddress(host, port);
-                socketChannel = SocketChannel.open();
-                socketChannel.configureBlocking(false);
-                logger.info("{}: Initiating connection", name);
-                socketChannel.connect(addr);
-                int timeoutCount = 0;
-                while (!socketChannel.finishConnect() && ++timeoutCount < 10) {
-                    if (interrupted.get()) {
-                        break;
-                    }
-                    logger.debug("(): Connecting...", name);
-                    try {
-                        cv.await(1000, TimeUnit.MILLISECONDS);
-                    } catch (InterruptedException ex) {
-                        break;
-                    }
-                }
-                if (interrupted.get() == false) {
-                    if (socketChannel.isConnected()) {
-                        //writingTolerancy = (timeoutInSeconds > 1000 ? (int) (timeoutInSeconds / 100) : 10);
-                        //socketChannel.register(selector, SelectionKey.OP_READ);
-                        while (true) {
-                            if (interrupted.get()) {
-                                break;
-                            }
-                            if (repeat(socketChannel) == false) {
-                                cv.await(1000, TimeUnit.MILLISECONDS);
-                            }
-                        }
-                    } else {
-                        throw new TransportException("Unable to connect to FileGateway server");
-                    }
-                }
+        SocketChannel socketChannel = null;
+        try {
+            //selector = Selector.open();
+            InetSocketAddress addr = new InetSocketAddress(host, port);
+            socketChannel = SocketChannel.open();
+            socketChannel.configureBlocking(false);
+            logger.info("{}: Initiating connection", identifier);
+            socketChannel.connect(addr);
+            int timeoutCount = 0;
+            while (!socketChannel.finishConnect() && ++timeoutCount < 10) {
                 if (interrupted.get()) {
-                    throw new TransportException("Connection has been interrupted");
+                    break;
                 }
-            } catch (Exception ex) {
-                logger.error(String.format("%s: SocketTransport failed", name), ex);
-            } finally {
-                lock.unlock();
-                if (socketChannel != null) {
-                    try {
-                        socketChannel.close();
-                    } catch (Exception ignore) {
-                    }
+                logger.debug("(): Connecting...", identifier);
+                try {
+                    cv.await(1000, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException ex) {
+                    break;
                 }
-                logger.info("{}: SocketTransport finished", name);
-                running.set(false);
             }
-        });
-        t.setName(name);
-        t.start();
+            if (interrupted.get() == false) {
+                if (socketChannel.isConnected()) {
+                    //writingTolerancy = (timeoutInSeconds > 1000 ? (int) (timeoutInSeconds / 100) : 10);
+                    //socketChannel.register(selector, SelectionKey.OP_READ);
+                    while (true) {
+                        if (interrupted.get()) {
+                            break;
+                        }
+                        if (repeat(socketChannel) == false) {
+                            cv.await(1000, TimeUnit.MILLISECONDS);
+                        }
+                    }
+                } else {
+                    throw new TransportException("Unable to connect to FileGateway server");
+                }
+            }
+            if (interrupted.get()) {
+                throw new TransportException("Connection has been interrupted");
+            }
+        } catch (Exception ex) {
+            logger.error(String.format("%s: SocketTransport failed", identifier), ex);
+        } finally {
+            if (socketChannel != null) {
+                try {
+                    socketChannel.close();
+                } catch (Exception ignore) {
+                }
+            }
+        }
     }
 
     public abstract boolean repeat(SocketChannel socketChannel) throws Exception;
@@ -173,7 +148,7 @@ public abstract class SocketTransport implements Server {
         byte[] sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
         int n = SessionUtils.read(socketChannel, sizeBytes);
         if (n < 0) {
-            throw new EOFException(String.format("SocketTransport '%s' was disconnected", name));
+            throw new EOFException(String.format("SocketTransport '%s' was disconnected", identifier));
         }
         byte[] respBytes = new byte[SessionUtils.parseInt(sizeBytes)];
         Operation.SessionResponse reply = Operation.SessionResponse.parseFrom(respBytes);
@@ -196,29 +171,7 @@ public abstract class SocketTransport implements Server {
     }
 
     @Override
-    public boolean isRunning() {
-        return running.get();
-    }
-
-    @Override
-    public void stop() {
-        if (running.get()) {
-            lock.lock();
-            try {
-                interrupted.set(true);
-                cv.signalAll();
-            } finally {
-                lock.unlock();
-            }
-            while (running.get()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ignore) {
-                    break;
-                }
-            }
-            interrupted.set(false);
-        }
+    protected void doStop() {
     }
 
 }

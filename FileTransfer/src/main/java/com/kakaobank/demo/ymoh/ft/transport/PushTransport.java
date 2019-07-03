@@ -65,7 +65,7 @@ public class PushTransport extends SocketTransport {
                 try (InputStream inputStream = new FileInputStream(file)) {
                     long len = SessionUtils.write(socketChannel, inputStream);
                     if (len < 0) {
-                        throw new EOFException(String.format("PushTransport '%s' was disconnected", name));
+                        throw new EOFException(String.format("PushTransport '%s' was disconnected", identifier));
                     }
                 }
                 readResponse(socketChannel, token);

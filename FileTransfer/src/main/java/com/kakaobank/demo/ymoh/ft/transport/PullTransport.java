@@ -31,7 +31,7 @@ public class PullTransport extends SocketTransport {
         byte[] sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
         int n = SessionUtils.read(socketChannel, sizeBytes);
         if (n < 0) {
-            throw new EOFException(String.format("PullTransport '%s' was disconnected", name));
+            throw new EOFException(String.format("PullTransport '%s' was disconnected", identifier));
         }
         byte[] respBytes = new byte[SessionUtils.parseInt(sizeBytes)];
         Operation.PullResponse resp = Operation.PullResponse.parseFrom(respBytes);
@@ -53,7 +53,7 @@ public class PullTransport extends SocketTransport {
                 outputStream = new FileOutputStream(tempFile);
                 long len = SessionUtils.read(socketChannel, length, outputStream);
                 if (len < 0) {
-                    throw new EOFException(String.format("PullTransport '%s' was disconnected", name));
+                    throw new EOFException(String.format("PullTransport '%s' was disconnected", identifier));
                 }
                 outputStream.flush();
                 status = "OK";
