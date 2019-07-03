@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.ByteChannel;
 import java.util.Date;
 
 /*
@@ -48,9 +48,9 @@ public class PullOperator extends AbstractOperator implements SessionOperator {
     }
 
     @Override
-    public void operate(SessionCommand command, SocketChannel socketChannel) throws Exception {
+    public void operate(SessionCommand command, ByteChannel byteChannel) throws Exception {
         byte[] requestBytes = new byte[command.getLength()];
-        int n = SessionUtils.read(socketChannel, requestBytes);
+        int n = SessionUtils.read(byteChannel, requestBytes);
         if (n < 0) {
             throw new EOFException(String.format("PullOperator '%s' was disconnected", command.getSessionId()));
         }
@@ -110,12 +110,12 @@ public class PullOperator extends AbstractOperator implements SessionOperator {
                     .setStatus(status)
                     .setReason(reason)
                     .build();
-            writeResponse(socketChannel, resp.toByteArray());
+            writeResponse(byteChannel, resp.toByteArray());
             if (status.equals("OK") && inputFile != null) {
                 InputStream inputStream = null;
                 try {
                     inputStream = new FileInputStream(inputFile);
-                    long len = SessionUtils.write(socketChannel, inputStream);
+                    long len = SessionUtils.write(byteChannel, inputStream);
                     if (len < 0) {
                         throw new EOFException(String.format("PullOperator '%s' was disconnected", command.getSessionId()));
                     }
@@ -145,7 +145,7 @@ public class PullOperator extends AbstractOperator implements SessionOperator {
                     }
                     if (status.isEmpty() == false) {
                         try {
-                            readResponse(socketChannel, command.getSessionId(), token);
+                            readResponse(byteChannel, command.getSessionId(), token);
                         } catch (Exception ex) {
                             status = "";
                             logger.warn("Failed to complete an output file", ex);
@@ -155,7 +155,7 @@ public class PullOperator extends AbstractOperator implements SessionOperator {
             }
         } finally {
             if (status.equals("OK") == false) {
-                socketChannel.close();
+                byteChannel.close();
             }
         }
     }

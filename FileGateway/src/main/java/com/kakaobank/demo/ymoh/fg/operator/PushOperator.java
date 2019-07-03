@@ -17,6 +17,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Date;
 
@@ -43,9 +44,9 @@ public class PushOperator extends AbstractOperator implements SessionOperator {
     }
 
     @Override
-    public void operate(SessionCommand command, SocketChannel socketChannel) throws Exception {
+    public void operate(SessionCommand command, ByteChannel byteChannel) throws Exception {
         byte[] requestBytes = new byte[command.getLength()];
-        int n = SessionUtils.read(socketChannel, requestBytes);
+        int n = SessionUtils.read(byteChannel, requestBytes);
         if (n < 0) {
             throw new EOFException(String.format("PushOperator '%s' was disconnected", command.getSessionId()));
         }
@@ -102,14 +103,14 @@ public class PushOperator extends AbstractOperator implements SessionOperator {
                     .setStatus(status)
                     .setReason(reason)
                     .build();
-            writeResponse(socketChannel, resp.toByteArray());
+            writeResponse(byteChannel, resp.toByteArray());
             if (status.equals("OK")) {
                 File tempFile = null;
                 OutputStream outputStream = null;
                 try {
                     tempFile = File.createTempFile("push_" + DateUtils.formatDate(new Date()) + "_", ".tmp");
                     outputStream = new FileOutputStream(tempFile);
-                    long len = SessionUtils.read(socketChannel, length, outputStream);
+                    long len = SessionUtils.read(byteChannel, length, outputStream);
                     if (len < 0) {
                         throw new EOFException(String.format("PushOperator '%s' was disconnected", command.getSessionId()));
                     }
@@ -148,13 +149,13 @@ public class PushOperator extends AbstractOperator implements SessionOperator {
                                 .setStatus(status)
                                 .setReason(reason)
                                 .build();
-                        writeResponse(socketChannel, resp.toByteArray());
+                        writeResponse(byteChannel, resp.toByteArray());
                     }
                 }
             }
         } finally {
             if (status.equals("OK") == false) {
-                socketChannel.close();
+                byteChannel.close();
             }
         }
     }

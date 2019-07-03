@@ -6,6 +6,7 @@ import com.kakaobank.demo.ymoh.fg.SessionException;
 import com.kakaobank.demo.ymoh.fg.SessionOperator;
 
 import java.io.EOFException;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
 
 abstract class AbstractOperator implements SessionOperator {
@@ -28,14 +29,14 @@ abstract class AbstractOperator implements SessionOperator {
 
     protected void increaseBadCount() { badCount++; }
 
-    protected void readResponse(SocketChannel socketChannel, String identifier, String token) throws Exception {
+    protected void readResponse(ByteChannel byteChannel, String identifier, String token) throws Exception {
         byte[] sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
-        int n = SessionUtils.read(socketChannel, sizeBytes);
+        int n = SessionUtils.read(byteChannel, sizeBytes);
         if (n < 0) {
             throw new EOFException(String.format("Operator '%s' was disconnected", identifier));
         }
         byte[] respBytes = new byte[SessionUtils.parseInt(sizeBytes)];
-        n = SessionUtils.read(socketChannel, respBytes);
+        n = SessionUtils.read(byteChannel, respBytes);
         if (n < 0) {
             throw new EOFException(String.format("Operator '%s' was disconnected", identifier));
         }
@@ -51,11 +52,11 @@ abstract class AbstractOperator implements SessionOperator {
         }
     }
 
-    protected void writeResponse(SocketChannel socketChannel, byte[] respBytes) throws Exception {
+    protected void writeResponse(ByteChannel byteChannel, byte[] respBytes) throws Exception {
         byte[] sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
         SessionUtils.putInt(sizeBytes, respBytes.length);
-        SessionUtils.write(socketChannel, sizeBytes);
-        SessionUtils.write(socketChannel, respBytes);
+        SessionUtils.write(byteChannel, sizeBytes);
+        SessionUtils.write(byteChannel, respBytes);
     }
 
 }

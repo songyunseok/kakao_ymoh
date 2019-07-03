@@ -16,7 +16,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.ByteChannel;
 import java.util.Date;
 
 @Component
@@ -59,7 +59,7 @@ public class PushTransport extends SocketTransport {
     }
 
     @Override
-    public boolean repeat(SocketChannel socketChannel) throws Exception {
+    public boolean repeat(ByteChannel byteChannel) throws Exception {
         String token = queue.nextToken();
         if (token != null) {
             try {
@@ -76,15 +76,15 @@ public class PushTransport extends SocketTransport {
                         .setTime(DateUtils.formatTime(date))
                         .build();
 
-                writeRequest(socketChannel, "PUSH", request.toByteArray());
-                readResponse(socketChannel, token);
+                writeRequest(byteChannel, "PUSH", request.toByteArray());
+                readResponse(byteChannel, token);
                 try (InputStream inputStream = new FileInputStream(file)) {
-                    long len = SessionUtils.write(socketChannel, inputStream);
+                    long len = SessionUtils.write(byteChannel, inputStream);
                     if (len < 0) {
                         throw new EOFException(String.format("PushTransport '%s' was disconnected", identifier));
                     }
                 }
-                readResponse(socketChannel, token);
+                readResponse(byteChannel, token);
 
                 increaseCount();
                 queue.commit(token);

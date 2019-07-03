@@ -2,31 +2,31 @@ package com.kakaobank.demo.ymoh.fg;
 
 import com.kakaobank.demo.ymoh.Server;
 import com.kakaobank.demo.ymoh.ServerBase;
-import org.baswell.niossl.NioSslLogger;
-import org.baswell.niossl.SSLServerSocketChannel;
-import org.baswell.niossl.SSLSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import tlschannel.ServerTlsChannel;
+import tlschannel.TlsChannel;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.net.ssl.SSLContext;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope("singleton")
-public class FileGateway extends ServerBase implements Server, SessionListener, NioSslLogger {
+public class FileGateway extends ServerBase implements Server, SessionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(FileGateway.class);
 
@@ -35,6 +35,9 @@ public class FileGateway extends ServerBase implements Server, SessionListener, 
     private int port;
 
     private Map<String,Session> sessions = new ConcurrentHashMap<>();
+
+    @Autowired
+    private SSLContext sslContext;
 
     @Autowired
     private List<SessionOperator> operators;
@@ -54,26 +57,6 @@ public class FileGateway extends ServerBase implements Server, SessionListener, 
     }
 
     @Override
-    public boolean logDebugs() {
-        return true;
-    }
-
-    @Override
-    public void debug(String message) {
-        logger.debug(message);
-    }
-
-    @Override
-    public void error(String message) {
-        logger.error(message);
-    }
-
-    @Override
-    public void error(String message, Throwable exception) {
-        logger.error(message, exception);
-    }
-
-    @Override
     protected Logger logger() {
         return logger;
     }
@@ -86,31 +69,23 @@ public class FileGateway extends ServerBase implements Server, SessionListener, 
 
     @Override
     protected void doStart() {
-        //Selector selector = null;
-        SSLServerSocketChannel sslServerSocketChannel = null;
+        Selector selector = null;
+        ServerSocketChannel serverSocketChannel = null;
         try {
-            //selector = Selector.open();
-            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+            selector = Selector.open();
+            serverSocketChannel = ServerSocketChannel.open();
             ServerSocket serverSocket = serverSocketChannel.socket();
             serverSocket.setReuseAddress(true);
             serverSocket.bind((host == null || host.length() == 0) ? new InetSocketAddress(port) : new InetSocketAddress(host, port));
             serverSocketChannel.configureBlocking(false);
-            //serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-
-            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-            sslContext.init(null, null, null);
-
-            //Thread pool for executing long-running SSL tasks
-            ThreadPoolExecutor sslThreadPool = new ThreadPoolExecutor(250, 2000, 25, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-
-            sslServerSocketChannel = new SSLServerSocketChannel(serverSocketChannel, sslContext, sslThreadPool, this);
+            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
             loop: while (true) {
                 if (interrupted.get()) {
                     break;
                 }
                 try {
-                    /*int n = selector.selectNow();
+                    int n = selector.selectNow();
                     if (n > 0) {
                         Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
                         while (iter.hasNext()) {
@@ -120,23 +95,28 @@ public class FileGateway extends ServerBase implements Server, SessionListener, 
                                 continue;
                             }
                             if (key.isAcceptable()) {
-                                SSLServerSocketChannel server = (SSLServerSocketChannel)key.channel();*/
-                    SSLSocketChannel socketChannel = sslServerSocketChannel.acceptOverSSL();
-                    if (socketChannel != null) {
-                        socketChannel.configureBlocking(false);
-                        //socketChannel.register(selector, SelectionKey.OP_READ);
-                        logger.info("Accepted a client connection from {}", socketChannel.getRemoteAddress().toString());
-                        FileSession session = new FileSession(socketChannel);
-                        sessions.put(session.getId(), session);
-                        session.addListener(this);
-                        for (SessionOperator operator : operators) {
-                            session.addOperator(operator);
+                                ServerSocketChannel server = (ServerSocketChannel)key.channel();
+                                SocketChannel socketChannel = server.accept();
+                                if (socketChannel != null) {
+                                    socketChannel.configureBlocking(false);
+                                    //socketChannel.register(selector, SelectionKey.OP_READ);
+                                    logger.info("Accepted a client connection from {}", socketChannel.getRemoteAddress().toString());
+
+                                    String address = socketChannel.getRemoteAddress().toString();
+
+                                    TlsChannel tlsChannel = ServerTlsChannel.newBuilder(socketChannel, sslContext).build();
+
+                                    FileSession session = new FileSession(tlsChannel, address);
+                                    sessions.put(session.getId(), session);
+                                    session.addListener(this);
+                                    for (SessionOperator operator : operators) {
+                                        session.addOperator(operator);
+                                    }
+                                    session.start();
+                                }
+                            }
                         }
-                        session.start();
                     }
-                            /*}
-                        }
-                    }*/
                     cv.await(1000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     break;
@@ -147,15 +127,15 @@ public class FileGateway extends ServerBase implements Server, SessionListener, 
         } catch (Throwable throwable) {
             logger.error("A fatal error occurred while listening", throwable);
         } finally {
-            /*if (selector != null) {
+            if (selector != null) {
                 try {
                     selector.close();
                 } catch (Exception ignore) {
                 }
-            }*/
-            if (sslServerSocketChannel != null) {
+            }
+            if (serverSocketChannel != null) {
                 try {
-                    sslServerSocketChannel.close();
+                    serverSocketChannel.close();
                 } catch (Exception ignore) {
                 }
             }

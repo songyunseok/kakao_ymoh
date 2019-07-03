@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.ByteChannel;
 import java.util.Date;
 
 @Component
@@ -37,20 +37,20 @@ public class PullTransport extends SocketTransport {
     }
 
     @Override
-    public boolean repeat(SocketChannel socketChannel) throws Exception {
+    public boolean repeat(ByteChannel byteChannel) throws Exception {
         Operation.PullRequest request = Operation.PullRequest.newBuilder()
                 .setUser(user)
                 .setPath(path)
                 .build();
-        writeRequest(socketChannel, "PULL", request.toByteArray());
+        writeRequest(byteChannel, "PULL", request.toByteArray());
 
         byte[] sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
-        int n = SessionUtils.read(socketChannel, sizeBytes);
+        int n = SessionUtils.read(byteChannel, sizeBytes);
         if (n < 0) {
             throw new EOFException(String.format("PullTransport '%s' was disconnected", identifier));
         }
         byte[] respBytes = new byte[SessionUtils.parseInt(sizeBytes)];
-        n = SessionUtils.read(socketChannel, respBytes);
+        n = SessionUtils.read(byteChannel, respBytes);
         if (n < 0) {
             throw new EOFException(String.format("PullTransport '%s' was disconnected", identifier));
         }
@@ -71,7 +71,7 @@ public class PullTransport extends SocketTransport {
             try {
                 tempFile = File.createTempFile("pull_" + DateUtils.formatDate(new Date()) + "_", ".tmp");
                 outputStream = new FileOutputStream(tempFile);
-                long len = SessionUtils.read(socketChannel, length, outputStream);
+                long len = SessionUtils.read(byteChannel, length, outputStream);
                 if (len < 0) {
                     throw new EOFException(String.format("PullTransport '%s' was disconnected", identifier));
                 }
@@ -110,7 +110,7 @@ public class PullTransport extends SocketTransport {
                             .setReason(reason)
                             .build();
                     respBytes = reply.toByteArray();
-                    writeResponse(socketChannel, respBytes);
+                    writeResponse(byteChannel, respBytes);
                 }
             }
             return true;

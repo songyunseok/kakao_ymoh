@@ -1,6 +1,6 @@
 package com.kakaobank.demo.ymoh.fg;
 
-import java.nio.channels.SocketChannel;
+import java.nio.channels.ByteChannel;
 
 public interface SessionOperator {
 
@@ -10,6 +10,6 @@ public interface SessionOperator {
 
     long getBadCount();
 
-    void operate(SessionCommand command, SocketChannel socketChannel) throws Exception;
+    void operate(SessionCommand command, ByteChannel byteChannel) throws Exception;
 
 }

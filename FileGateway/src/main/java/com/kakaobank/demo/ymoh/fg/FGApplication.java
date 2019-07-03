@@ -17,14 +17,18 @@ public class FGApplication {
         return locator;
     }
 
-    public static void main(String[] args) {
+    @Bean
+    public SSLContext sslContext() {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
             sslContext.init(null, null, null);
+            return sslContext;
         } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-            System.exit(-1);
+            throw new RuntimeException(ex);
         }
+    }
+
+    public static void main(String[] args) {
         SpringApplication.run(FGApplication.class, args);
     }
 

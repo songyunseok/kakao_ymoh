@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.EOFException;
 
-import java.nio.channels.SocketChannel;
+import java.nio.channels.ByteChannel;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ public class FileSession extends ServerBase implements Session {
 
     private static Logger logger = LoggerFactory.getLogger(FileSession.class);
 
-    private SocketChannel socketChannel;
+    private ByteChannel byteChannel;
 
     private Map<String, SessionOperator> operators = new HashMap<String, SessionOperator>();
 
@@ -30,10 +30,11 @@ public class FileSession extends ServerBase implements Session {
 
     private String address;
 
-    public FileSession(SocketChannel socketChannel) {
-        this.socketChannel = socketChannel;
+    public FileSession(ByteChannel byteChannel, String address) {
+        this.byteChannel = byteChannel;
         //this.sessionId = UUID.randomUUID().toString();
         this.identifier = "FS_" + Long.toString(++instanceCounter);
+        this.address = address;
 
     }
 
@@ -50,21 +51,20 @@ public class FileSession extends ServerBase implements Session {
     @Override
     protected void doStart() {
         try {
-            address = socketChannel.getRemoteAddress().toString();
             while (true) {
                 if (interrupted.get()) {
                     break;
                 }
                 try {
                     byte[] methodBytes = new byte[SessionUtils.OP_NETHOD_SIZE];
-                    int n = SessionUtils.read(socketChannel, methodBytes);
+                    int n = SessionUtils.read(byteChannel, methodBytes);
                     if (n < 0) {
                         throw new EOFException(String.format("FileSession '%s' was disconnected", identifier));
                     }
                     String method = SessionUtils.parseString(methodBytes);
                     logger.debug("FileSession '{}' method = '{}", identifier, method);
                     byte[] lengthBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
-                    n = SessionUtils.read(socketChannel, lengthBytes);
+                    n = SessionUtils.read(byteChannel, lengthBytes);
                     if (n < 0) {
                         throw new EOFException(String.format("FileSession '%s' was disconnected", identifier));
                     }
@@ -73,10 +73,10 @@ public class FileSession extends ServerBase implements Session {
                     SessionCommand command = new SessionCommand(method, length, identifier);
                     SessionOperator operator = operators.get(command.getMethod());
                     if (operator != null) {
-                        operator.operate(command, socketChannel);
-                        if (socketChannel.isConnected() == false) {
+                        operator.operate(command, byteChannel);
+                        /*if (socketChannel.isConnected() == false) {
                             break;
-                        }
+                        }*/
                     } else {
                         logger.warn(String.format("FileSession '%s' received an unsupported command '%s'", identifier, command));
                     }
@@ -95,7 +95,7 @@ public class FileSession extends ServerBase implements Session {
                 listener.sessionStopping(identifier);
             }
             try {
-                socketChannel.close();
+                byteChannel.close();
             } catch (Exception ignore) {
             }
         }

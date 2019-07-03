@@ -4,25 +4,23 @@ import com.kakaobank.demo.ymoh.Server;
 import com.kakaobank.demo.ymoh.ServerBase;
 import com.kakaobank.demo.ymoh.SessionUtils;
 import com.kakaobank.demo.ymoh.fb.Operation;
-import org.baswell.niossl.NioSslLogger;
-import org.baswell.niossl.SSLSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import tlschannel.ClientTlsChannel;
+import tlschannel.TlsChannel;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import java.io.EOFException;
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public abstract class SocketTransport extends ServerBase implements Server, NioSslLogger {
+public abstract class SocketTransport extends ServerBase implements Server {
 
     private static Logger logger = LoggerFactory.getLogger(SocketTransport.class);
 
@@ -40,6 +38,9 @@ public abstract class SocketTransport extends ServerBase implements Server, NioS
 
     @Autowired
     private Environment env;
+
+    @Autowired
+    private SSLContext sslContext;
 
     @Value("${gateway.host:localhost}")
     public void setHost(String host) {
@@ -92,26 +93,6 @@ public abstract class SocketTransport extends ServerBase implements Server, NioS
     }
 
     @Override
-    public boolean logDebugs() {
-        return true;
-    }
-
-    @Override
-    public void debug(String message) {
-        logger.debug(message);
-    }
-
-    @Override
-    public void error(String message) {
-        logger.error(message);
-    }
-
-    @Override
-    public void error(String message, Throwable exception) {
-        logger.error(message, exception);
-    }
-
-    @Override
     protected Logger logger() {
         return logger;
     }
@@ -119,26 +100,16 @@ public abstract class SocketTransport extends ServerBase implements Server, NioS
     @Override
     protected void doStart() {
         resolveHomeDir();
-        SSLSocketChannel sslSocketChannel = null;
+        SocketChannel socketChannel = null;
         try {
             InetSocketAddress addr = new InetSocketAddress(host, port);
-            SocketChannel socketChannel = SocketChannel.open();
+            socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);
 
-            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-            sslContext.init(null, null, null);
-            SSLEngine sslEngine = sslContext.createSSLEngine();
-            sslEngine.setUseClientMode(true);
-
-            // Thread pool for executing long-running SSL tasks
-            ThreadPoolExecutor sslThreadPool = new ThreadPoolExecutor(250, 2000, 25, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-
-            sslSocketChannel = new SSLSocketChannel(socketChannel, sslEngine, sslThreadPool, this);
-
             logger.info("{}: Initiating connection", identifier);
-            sslSocketChannel.connect(addr);
+            socketChannel.connect(addr);
             int timeoutCount = 0;
-            while (!sslSocketChannel.finishConnect() && ++timeoutCount < 10) {
+            while (!socketChannel.finishConnect() && ++timeoutCount < 10) {
                 if (interrupted.get()) {
                     break;
                 }
@@ -150,14 +121,13 @@ public abstract class SocketTransport extends ServerBase implements Server, NioS
                 }
             }
             if (interrupted.get() == false) {
-                if (sslSocketChannel.isConnected()) {
-                    //writingTolerancy = (timeoutInSeconds > 1000 ? (int) (timeoutInSeconds / 100) : 10);
-                    //socketChannel.register(selector, SelectionKey.OP_READ);
+                if (socketChannel.isConnected()) {
+                    TlsChannel tlsChannel = ClientTlsChannel.newBuilder(socketChannel, sslContext).build();
                     while (true) {
                         if (interrupted.get()) {
                             break;
                         }
-                        if (repeat(sslSocketChannel) == false) {
+                        if (repeat(tlsChannel) == false) {
                             cv.await(1000, TimeUnit.MILLISECONDS);
                         }
                     }
@@ -171,35 +141,35 @@ public abstract class SocketTransport extends ServerBase implements Server, NioS
         } catch (Exception ex) {
             logger.error(String.format("%s: SocketTransport failed", identifier), ex);
         } finally {
-            if (sslSocketChannel != null) {
+            if (socketChannel != null) {
                 try {
-                    sslSocketChannel.close();
+                    socketChannel.close();
                 } catch (Exception ignore) {
                 }
             }
         }
     }
 
-    public abstract boolean repeat(SocketChannel socketChannel) throws Exception;
+    public abstract boolean repeat(ByteChannel byteChannel) throws Exception;
 
-    protected void writeRequest(SocketChannel socketChannel, String method, byte[] reqBytes) throws Exception {
+    protected void writeRequest(ByteChannel byteChannel, String method, byte[] reqBytes) throws Exception {
         byte[] methodBytes = new byte[SessionUtils.OP_NETHOD_SIZE];
         SessionUtils.putString(methodBytes, method);
-        SessionUtils.write(socketChannel, methodBytes);
+        SessionUtils.write(byteChannel, methodBytes);
         byte[] lengthBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
         SessionUtils.putInt(lengthBytes, reqBytes.length);
-        SessionUtils.write(socketChannel, lengthBytes);
-        SessionUtils.write(socketChannel, reqBytes);
+        SessionUtils.write(byteChannel, lengthBytes);
+        SessionUtils.write(byteChannel, reqBytes);
     }
 
-    protected void readResponse(SocketChannel socketChannel, String token) throws Exception {
+    protected void readResponse(ByteChannel byteChannel, String token) throws Exception {
         byte[] sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
-        int n = SessionUtils.read(socketChannel, sizeBytes);
+        int n = SessionUtils.read(byteChannel, sizeBytes);
         if (n < 0) {
             throw new EOFException(String.format("SocketTransport '%s' was disconnected", identifier));
         }
         byte[] respBytes = new byte[SessionUtils.parseInt(sizeBytes)];
-        n = SessionUtils.read(socketChannel, respBytes);
+        n = SessionUtils.read(byteChannel, respBytes);
         if (n < 0) {
             throw new EOFException(String.format("SocketTransport '%s' was disconnected", identifier));
         }
@@ -215,11 +185,11 @@ public abstract class SocketTransport extends ServerBase implements Server, NioS
         }
     }
 
-    protected void writeResponse(SocketChannel socketChannel, byte[] respBytes) throws Exception {
+    protected void writeResponse(ByteChannel byteChannel, byte[] respBytes) throws Exception {
         byte[] sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
         SessionUtils.putInt(sizeBytes, respBytes.length);
-        SessionUtils.write(socketChannel, sizeBytes);
-        SessionUtils.write(socketChannel, respBytes);
+        SessionUtils.write(byteChannel, sizeBytes);
+        SessionUtils.write(byteChannel, respBytes);
     }
 
     @Override
