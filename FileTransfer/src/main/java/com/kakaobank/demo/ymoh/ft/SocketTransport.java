@@ -37,7 +37,7 @@ public abstract class SocketTransport extends ServerBase implements Server {
     @Autowired
     private Environment env;
 
-    public void setIdentifier(String identifier) { this.identifier = identifier; }
+    //public void setIdentifier(String identifier) { this.identifier = identifier; }
 
     @Value("${gateway.host:localhost}")
     public void setHost(String host) {
@@ -49,13 +49,21 @@ public abstract class SocketTransport extends ServerBase implements Server {
         this.port = port;
     }
 
+    public String getUser() { return this.user; }
+
     public void setUser(String user) { this.user = user; }
+
+    public String getPath() { return this.path; }
 
     public void setPath(String path) { this.path = path; }
 
+    public abstract String getMethod();
+
+    protected abstract String getHomePathPropertyName();
+
     protected void resolveHomeDir() {
         File userDir = new File(System.getProperty("user.dir"));
-        String homePath = env.getProperty(user + ".push.home");
+        String homePath = env.getProperty(user + getHomePathPropertyName());
         if (homePath == null || homePath.length() == 0) {
             throw new RuntimeException(String.format("Home path [%s] is not found", homePath));
         }
@@ -151,6 +159,10 @@ public abstract class SocketTransport extends ServerBase implements Server {
             throw new EOFException(String.format("SocketTransport '%s' was disconnected", identifier));
         }
         byte[] respBytes = new byte[SessionUtils.parseInt(sizeBytes)];
+        n = SessionUtils.read(socketChannel, respBytes);
+        if (n < 0) {
+            throw new EOFException(String.format("SocketTransport '%s' was disconnected", identifier));
+        }
         Operation.SessionResponse reply = Operation.SessionResponse.parseFrom(respBytes);
         if (token.equals(reply.getToken())) {
             String status = reply.getStatus();

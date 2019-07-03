@@ -30,6 +30,22 @@ public class PushTransport extends SocketTransport {
     @Autowired
     private FileQueueLocator locator;
 
+    private static volatile long instanceCounter = 0;
+
+    public PushTransport() {
+        this.identifier = "PUSH_" + Long.toString(++instanceCounter);
+    }
+
+    @Override
+    public String getMethod() {
+        return "PUSH";
+    }
+
+    @Override
+    protected String getHomePathPropertyName() {
+        return ".push.home";
+    }
+
     @Override
     protected void resolveHomeDir() {
         super.resolveHomeDir();

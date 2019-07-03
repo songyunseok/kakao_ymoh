@@ -20,6 +20,22 @@ public class PullTransport extends SocketTransport {
 
     private static Logger logger = LoggerFactory.getLogger(PullTransport.class);
 
+    private static volatile long instanceCounter = 0;
+
+    public PullTransport() {
+        this.identifier = "PULL_" + Long.toString(++instanceCounter);
+    }
+
+    @Override
+    public String getMethod() {
+        return "PULL";
+    }
+
+    @Override
+    protected String getHomePathPropertyName() {
+        return ".pull.home";
+    }
+
     @Override
     public boolean repeat(SocketChannel socketChannel) throws Exception {
         Operation.PullRequest request = Operation.PullRequest.newBuilder()
@@ -34,6 +50,10 @@ public class PullTransport extends SocketTransport {
             throw new EOFException(String.format("PullTransport '%s' was disconnected", identifier));
         }
         byte[] respBytes = new byte[SessionUtils.parseInt(sizeBytes)];
+        n = SessionUtils.read(socketChannel, respBytes);
+        if (n < 0) {
+            throw new EOFException(String.format("PullTransport '%s' was disconnected", identifier));
+        }
         Operation.PullResponse resp = Operation.PullResponse.parseFrom(respBytes);
 
         String status = resp.getStatus();

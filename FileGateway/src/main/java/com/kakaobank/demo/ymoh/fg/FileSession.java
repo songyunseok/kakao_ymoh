@@ -53,14 +53,14 @@ public class FileSession extends ServerBase implements Session {
                         throw new EOFException(String.format("FileSession '%s' was disconnected", identifier));
                     }
                     String method = SessionUtils.parseString(methodBytes);
-                    logger.debug("FileSession '%s' method = %s", identifier, method);
+                    logger.debug("FileSession '{}' method = '{}", identifier, method);
                     byte[] lengthBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
                     n = SessionUtils.read(socketChannel, lengthBytes);
                     if (n < 0) {
                         throw new EOFException(String.format("FileSession '%s' was disconnected", identifier));
                     }
                     int length = SessionUtils.parseInt(lengthBytes);
-                    logger.debug("FileSession '%s' length = %d", identifier, length);
+                    logger.debug("FileSession '{}' length = {}", identifier, length);
                     SessionCommand command = new SessionCommand(method, length, identifier);
                     SessionOperator operator = operators.get(command.getMethod());
                     if (operator != null) {
