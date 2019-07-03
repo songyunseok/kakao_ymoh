@@ -104,9 +104,9 @@ public class FileGateway extends ServerBase implements Server, SessionListener {
 
                                     String address = socketChannel.getRemoteAddress().toString();
 
-                                    TlsChannel tlsChannel = ServerTlsChannel.newBuilder(socketChannel, sslContext).build();
+                                    //TlsChannel tlsChannel = ServerTlsChannel.newBuilder(socketChannel, sslContext).build();
 
-                                    FileSession session = new FileSession(tlsChannel, address);
+                                    FileSession session = new FileSession(socketChannel/*tlsChannel*/, address);
                                     sessions.put(session.getId(), session);
                                     session.addListener(this);
                                     for (SessionOperator operator : operators) {

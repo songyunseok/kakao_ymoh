@@ -122,12 +122,12 @@ public abstract class SocketTransport extends ServerBase implements Server {
             }
             if (interrupted.get() == false) {
                 if (socketChannel.isConnected()) {
-                    TlsChannel tlsChannel = ClientTlsChannel.newBuilder(socketChannel, sslContext).build();
+                    //TlsChannel tlsChannel = ClientTlsChannel.newBuilder(socketChannel, sslContext).build();
                     while (true) {
                         if (interrupted.get()) {
                             break;
                         }
-                        if (repeat(tlsChannel) == false) {
+                        if (repeat(socketChannel/*tlsChannel*/) == false) {
                             cv.await(1000, TimeUnit.MILLISECONDS);
                         }
                     }

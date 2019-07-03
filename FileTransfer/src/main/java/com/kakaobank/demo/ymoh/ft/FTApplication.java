@@ -5,7 +5,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.InputStream;
+import java.security.KeyStore;
 
 @SpringBootApplication
 public class FTApplication {
@@ -20,9 +24,20 @@ public class FTApplication {
     @Bean
     public SSLContext sslContext() {
         try {
-            SSLContext sslContext = SSLContext.getDefault();
+            //SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
             //sslContext.init(null, null, null);
-            return sslContext;
+            /*KeyStore ks = KeyStore.getInstance("JKS");
+            try (InputStream keystoreFile =
+                         FTApplication.class.getClassLoader().getResourceAsStream("keystore.jks")) {
+                ks.load(keystoreFile, "password".toCharArray());
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(ks);
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                kmf.init(ks, "password".toCharArray());
+                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+                return sslContext;
+            }*/
+            return SSLContext.getDefault();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
