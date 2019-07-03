@@ -5,6 +5,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import javax.net.ssl.SSLContext;
+
 @SpringBootApplication
 public class FGApplication {
 
@@ -16,6 +18,13 @@ public class FGApplication {
     }
 
     public static void main(String[] args) {
+        try {
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+            sslContext.init(null, null, null);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+            System.exit(-1);
+        }
         SpringApplication.run(FGApplication.class, args);
     }
 

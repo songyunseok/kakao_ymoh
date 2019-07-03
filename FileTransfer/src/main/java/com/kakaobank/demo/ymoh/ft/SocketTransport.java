@@ -4,19 +4,25 @@ import com.kakaobank.demo.ymoh.Server;
 import com.kakaobank.demo.ymoh.ServerBase;
 import com.kakaobank.demo.ymoh.SessionUtils;
 import com.kakaobank.demo.ymoh.fb.Operation;
+import org.baswell.niossl.NioSslLogger;
+import org.baswell.niossl.SSLSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import java.io.EOFException;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public abstract class SocketTransport extends ServerBase implements Server {
+public abstract class SocketTransport extends ServerBase implements Server, NioSslLogger {
 
     private static Logger logger = LoggerFactory.getLogger(SocketTransport.class);
 
@@ -86,6 +92,26 @@ public abstract class SocketTransport extends ServerBase implements Server {
     }
 
     @Override
+    public boolean logDebugs() {
+        return true;
+    }
+
+    @Override
+    public void debug(String message) {
+        logger.debug(message);
+    }
+
+    @Override
+    public void error(String message) {
+        logger.error(message);
+    }
+
+    @Override
+    public void error(String message, Throwable exception) {
+        logger.error(message, exception);
+    }
+
+    @Override
     protected Logger logger() {
         return logger;
     }
@@ -93,16 +119,26 @@ public abstract class SocketTransport extends ServerBase implements Server {
     @Override
     protected void doStart() {
         resolveHomeDir();
-        SocketChannel socketChannel = null;
+        SSLSocketChannel sslSocketChannel = null;
         try {
-            //selector = Selector.open();
             InetSocketAddress addr = new InetSocketAddress(host, port);
-            socketChannel = SocketChannel.open();
+            SocketChannel socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);
+
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+            sslContext.init(null, null, null);
+            SSLEngine sslEngine = sslContext.createSSLEngine();
+            sslEngine.setUseClientMode(true);
+
+            // Thread pool for executing long-running SSL tasks
+            ThreadPoolExecutor sslThreadPool = new ThreadPoolExecutor(250, 2000, 25, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+
+            sslSocketChannel = new SSLSocketChannel(socketChannel, sslEngine, sslThreadPool, this);
+
             logger.info("{}: Initiating connection", identifier);
-            socketChannel.connect(addr);
+            sslSocketChannel.connect(addr);
             int timeoutCount = 0;
-            while (!socketChannel.finishConnect() && ++timeoutCount < 10) {
+            while (!sslSocketChannel.finishConnect() && ++timeoutCount < 10) {
                 if (interrupted.get()) {
                     break;
                 }
@@ -114,14 +150,14 @@ public abstract class SocketTransport extends ServerBase implements Server {
                 }
             }
             if (interrupted.get() == false) {
-                if (socketChannel.isConnected()) {
+                if (sslSocketChannel.isConnected()) {
                     //writingTolerancy = (timeoutInSeconds > 1000 ? (int) (timeoutInSeconds / 100) : 10);
                     //socketChannel.register(selector, SelectionKey.OP_READ);
                     while (true) {
                         if (interrupted.get()) {
                             break;
                         }
-                        if (repeat(socketChannel) == false) {
+                        if (repeat(sslSocketChannel) == false) {
                             cv.await(1000, TimeUnit.MILLISECONDS);
                         }
                     }
@@ -135,9 +171,9 @@ public abstract class SocketTransport extends ServerBase implements Server {
         } catch (Exception ex) {
             logger.error(String.format("%s: SocketTransport failed", identifier), ex);
         } finally {
-            if (socketChannel != null) {
+            if (sslSocketChannel != null) {
                 try {
-                    socketChannel.close();
+                    sslSocketChannel.close();
                 } catch (Exception ignore) {
                 }
             }

@@ -59,7 +59,6 @@ public class PushOperator extends AbstractOperator implements SessionOperator {
         String fileName = request.getFileName();
         long length = request.getLength();
         String path = request.getPath();
-        String checkSum = request.getCheckSum();
         String signature = request.getSignature();
         String status = "OK";
         String reason = "";

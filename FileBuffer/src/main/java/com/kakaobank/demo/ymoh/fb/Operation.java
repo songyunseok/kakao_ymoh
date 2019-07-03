@@ -112,29 +112,15 @@ public final class Operation {
         getTimeBytes();
 
     /**
-     * <code>optional string checkSum = 8;</code>
-     */
-    boolean hasCheckSum();
-    /**
-     * <code>optional string checkSum = 8;</code>
-     */
-    java.lang.String getCheckSum();
-    /**
-     * <code>optional string checkSum = 8;</code>
-     */
-    com.google.protobuf.ByteString
-        getCheckSumBytes();
-
-    /**
-     * <code>optional string signature = 9;</code>
+     * <code>optional string signature = 8;</code>
      */
     boolean hasSignature();
     /**
-     * <code>optional string signature = 9;</code>
+     * <code>optional string signature = 8;</code>
      */
     java.lang.String getSignature();
     /**
-     * <code>optional string signature = 9;</code>
+     * <code>optional string signature = 8;</code>
      */
     com.google.protobuf.ByteString
         getSignatureBytes();
@@ -158,7 +144,6 @@ public final class Operation {
       path_ = "";
       date_ = "";
       time_ = "";
-      checkSum_ = "";
       signature_ = "";
     }
 
@@ -234,12 +219,6 @@ public final class Operation {
             case 66: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000080;
-              checkSum_ = bs;
-              break;
-            }
-            case 74: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000100;
               signature_ = bs;
               break;
             }
@@ -535,58 +514,16 @@ public final class Operation {
       }
     }
 
-    public static final int CHECKSUM_FIELD_NUMBER = 8;
-    private volatile java.lang.Object checkSum_;
+    public static final int SIGNATURE_FIELD_NUMBER = 8;
+    private volatile java.lang.Object signature_;
     /**
-     * <code>optional string checkSum = 8;</code>
+     * <code>optional string signature = 8;</code>
      */
-    public boolean hasCheckSum() {
+    public boolean hasSignature() {
       return ((bitField0_ & 0x00000080) == 0x00000080);
     }
     /**
-     * <code>optional string checkSum = 8;</code>
-     */
-    public java.lang.String getCheckSum() {
-      java.lang.Object ref = checkSum_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          checkSum_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string checkSum = 8;</code>
-     */
-    public com.google.protobuf.ByteString
-        getCheckSumBytes() {
-      java.lang.Object ref = checkSum_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        checkSum_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int SIGNATURE_FIELD_NUMBER = 9;
-    private volatile java.lang.Object signature_;
-    /**
-     * <code>optional string signature = 9;</code>
-     */
-    public boolean hasSignature() {
-      return ((bitField0_ & 0x00000100) == 0x00000100);
-    }
-    /**
-     * <code>optional string signature = 9;</code>
+     * <code>optional string signature = 8;</code>
      */
     public java.lang.String getSignature() {
       java.lang.Object ref = signature_;
@@ -603,7 +540,7 @@ public final class Operation {
       }
     }
     /**
-     * <code>optional string signature = 9;</code>
+     * <code>optional string signature = 8;</code>
      */
     public com.google.protobuf.ByteString
         getSignatureBytes() {
@@ -669,10 +606,7 @@ public final class Operation {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, time_);
       }
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, checkSum_);
-      }
-      if (((bitField0_ & 0x00000100) == 0x00000100)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, signature_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, signature_);
       }
       unknownFields.writeTo(output);
     }
@@ -705,10 +639,7 @@ public final class Operation {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, time_);
       }
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, checkSum_);
-      }
-      if (((bitField0_ & 0x00000100) == 0x00000100)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, signature_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, signature_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -762,11 +693,6 @@ public final class Operation {
         result = result && getTime()
             .equals(other.getTime());
       }
-      result = result && (hasCheckSum() == other.hasCheckSum());
-      if (hasCheckSum()) {
-        result = result && getCheckSum()
-            .equals(other.getCheckSum());
-      }
       result = result && (hasSignature() == other.hasSignature());
       if (hasSignature()) {
         result = result && getSignature()
@@ -811,10 +737,6 @@ public final class Operation {
       if (hasTime()) {
         hash = (37 * hash) + TIME_FIELD_NUMBER;
         hash = (53 * hash) + getTime().hashCode();
-      }
-      if (hasCheckSum()) {
-        hash = (37 * hash) + CHECKSUM_FIELD_NUMBER;
-        hash = (53 * hash) + getCheckSum().hashCode();
       }
       if (hasSignature()) {
         hash = (37 * hash) + SIGNATURE_FIELD_NUMBER;
@@ -952,10 +874,8 @@ public final class Operation {
         bitField0_ = (bitField0_ & ~0x00000020);
         time_ = "";
         bitField0_ = (bitField0_ & ~0x00000040);
-        checkSum_ = "";
-        bitField0_ = (bitField0_ & ~0x00000080);
         signature_ = "";
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -1010,10 +930,6 @@ public final class Operation {
         result.time_ = time_;
         if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
           to_bitField0_ |= 0x00000080;
-        }
-        result.checkSum_ = checkSum_;
-        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
-          to_bitField0_ |= 0x00000100;
         }
         result.signature_ = signature_;
         result.bitField0_ = to_bitField0_;
@@ -1091,13 +1007,8 @@ public final class Operation {
           time_ = other.time_;
           onChanged();
         }
-        if (other.hasCheckSum()) {
-          bitField0_ |= 0x00000080;
-          checkSum_ = other.checkSum_;
-          onChanged();
-        }
         if (other.hasSignature()) {
-          bitField0_ |= 0x00000100;
+          bitField0_ |= 0x00000080;
           signature_ = other.signature_;
           onChanged();
         }
@@ -1629,91 +1540,15 @@ public final class Operation {
         return this;
       }
 
-      private java.lang.Object checkSum_ = "";
+      private java.lang.Object signature_ = "";
       /**
-       * <code>optional string checkSum = 8;</code>
+       * <code>optional string signature = 8;</code>
        */
-      public boolean hasCheckSum() {
+      public boolean hasSignature() {
         return ((bitField0_ & 0x00000080) == 0x00000080);
       }
       /**
-       * <code>optional string checkSum = 8;</code>
-       */
-      public java.lang.String getCheckSum() {
-        java.lang.Object ref = checkSum_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            checkSum_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string checkSum = 8;</code>
-       */
-      public com.google.protobuf.ByteString
-          getCheckSumBytes() {
-        java.lang.Object ref = checkSum_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          checkSum_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string checkSum = 8;</code>
-       */
-      public Builder setCheckSum(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000080;
-        checkSum_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string checkSum = 8;</code>
-       */
-      public Builder clearCheckSum() {
-        bitField0_ = (bitField0_ & ~0x00000080);
-        checkSum_ = getDefaultInstance().getCheckSum();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string checkSum = 8;</code>
-       */
-      public Builder setCheckSumBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000080;
-        checkSum_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object signature_ = "";
-      /**
-       * <code>optional string signature = 9;</code>
-       */
-      public boolean hasSignature() {
-        return ((bitField0_ & 0x00000100) == 0x00000100);
-      }
-      /**
-       * <code>optional string signature = 9;</code>
+       * <code>optional string signature = 8;</code>
        */
       public java.lang.String getSignature() {
         java.lang.Object ref = signature_;
@@ -1730,7 +1565,7 @@ public final class Operation {
         }
       }
       /**
-       * <code>optional string signature = 9;</code>
+       * <code>optional string signature = 8;</code>
        */
       public com.google.protobuf.ByteString
           getSignatureBytes() {
@@ -1746,36 +1581,36 @@ public final class Operation {
         }
       }
       /**
-       * <code>optional string signature = 9;</code>
+       * <code>optional string signature = 8;</code>
        */
       public Builder setSignature(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000100;
+  bitField0_ |= 0x00000080;
         signature_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string signature = 9;</code>
+       * <code>optional string signature = 8;</code>
        */
       public Builder clearSignature() {
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000080);
         signature_ = getDefaultInstance().getSignature();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string signature = 9;</code>
+       * <code>optional string signature = 8;</code>
        */
       public Builder setSignatureBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000100;
+  bitField0_ |= 0x00000080;
         signature_ = value;
         onChanged();
         return this;
@@ -3710,29 +3545,15 @@ public final class Operation {
         getReasonBytes();
 
     /**
-     * <code>optional string checkSum = 9;</code>
-     */
-    boolean hasCheckSum();
-    /**
-     * <code>optional string checkSum = 9;</code>
-     */
-    java.lang.String getCheckSum();
-    /**
-     * <code>optional string checkSum = 9;</code>
-     */
-    com.google.protobuf.ByteString
-        getCheckSumBytes();
-
-    /**
-     * <code>optional string signature = 10;</code>
+     * <code>optional string signature = 9;</code>
      */
     boolean hasSignature();
     /**
-     * <code>optional string signature = 10;</code>
+     * <code>optional string signature = 9;</code>
      */
     java.lang.String getSignature();
     /**
-     * <code>optional string signature = 10;</code>
+     * <code>optional string signature = 9;</code>
      */
     com.google.protobuf.ByteString
         getSignatureBytes();
@@ -3757,7 +3578,6 @@ public final class Operation {
       time_ = "";
       status_ = "";
       reason_ = "";
-      checkSum_ = "";
       signature_ = "";
     }
 
@@ -3839,12 +3659,6 @@ public final class Operation {
             case 74: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000100;
-              checkSum_ = bs;
-              break;
-            }
-            case 82: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000200;
               signature_ = bs;
               break;
             }
@@ -4182,58 +3996,16 @@ public final class Operation {
       }
     }
 
-    public static final int CHECKSUM_FIELD_NUMBER = 9;
-    private volatile java.lang.Object checkSum_;
+    public static final int SIGNATURE_FIELD_NUMBER = 9;
+    private volatile java.lang.Object signature_;
     /**
-     * <code>optional string checkSum = 9;</code>
+     * <code>optional string signature = 9;</code>
      */
-    public boolean hasCheckSum() {
+    public boolean hasSignature() {
       return ((bitField0_ & 0x00000100) == 0x00000100);
     }
     /**
-     * <code>optional string checkSum = 9;</code>
-     */
-    public java.lang.String getCheckSum() {
-      java.lang.Object ref = checkSum_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          checkSum_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string checkSum = 9;</code>
-     */
-    public com.google.protobuf.ByteString
-        getCheckSumBytes() {
-      java.lang.Object ref = checkSum_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        checkSum_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int SIGNATURE_FIELD_NUMBER = 10;
-    private volatile java.lang.Object signature_;
-    /**
-     * <code>optional string signature = 10;</code>
-     */
-    public boolean hasSignature() {
-      return ((bitField0_ & 0x00000200) == 0x00000200);
-    }
-    /**
-     * <code>optional string signature = 10;</code>
+     * <code>optional string signature = 9;</code>
      */
     public java.lang.String getSignature() {
       java.lang.Object ref = signature_;
@@ -4250,7 +4022,7 @@ public final class Operation {
       }
     }
     /**
-     * <code>optional string signature = 10;</code>
+     * <code>optional string signature = 9;</code>
      */
     public com.google.protobuf.ByteString
         getSignatureBytes() {
@@ -4315,10 +4087,7 @@ public final class Operation {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, reason_);
       }
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, checkSum_);
-      }
-      if (((bitField0_ & 0x00000200) == 0x00000200)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, signature_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, signature_);
       }
       unknownFields.writeTo(output);
     }
@@ -4354,10 +4123,7 @@ public final class Operation {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, reason_);
       }
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, checkSum_);
-      }
-      if (((bitField0_ & 0x00000200) == 0x00000200)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, signature_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, signature_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4416,11 +4182,6 @@ public final class Operation {
         result = result && getReason()
             .equals(other.getReason());
       }
-      result = result && (hasCheckSum() == other.hasCheckSum());
-      if (hasCheckSum()) {
-        result = result && getCheckSum()
-            .equals(other.getCheckSum());
-      }
       result = result && (hasSignature() == other.hasSignature());
       if (hasSignature()) {
         result = result && getSignature()
@@ -4469,10 +4230,6 @@ public final class Operation {
       if (hasReason()) {
         hash = (37 * hash) + REASON_FIELD_NUMBER;
         hash = (53 * hash) + getReason().hashCode();
-      }
-      if (hasCheckSum()) {
-        hash = (37 * hash) + CHECKSUM_FIELD_NUMBER;
-        hash = (53 * hash) + getCheckSum().hashCode();
       }
       if (hasSignature()) {
         hash = (37 * hash) + SIGNATURE_FIELD_NUMBER;
@@ -4612,10 +4369,8 @@ public final class Operation {
         bitField0_ = (bitField0_ & ~0x00000040);
         reason_ = "";
         bitField0_ = (bitField0_ & ~0x00000080);
-        checkSum_ = "";
-        bitField0_ = (bitField0_ & ~0x00000100);
         signature_ = "";
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000100);
         return this;
       }
 
@@ -4674,10 +4429,6 @@ public final class Operation {
         result.reason_ = reason_;
         if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
           to_bitField0_ |= 0x00000100;
-        }
-        result.checkSum_ = checkSum_;
-        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
-          to_bitField0_ |= 0x00000200;
         }
         result.signature_ = signature_;
         result.bitField0_ = to_bitField0_;
@@ -4760,13 +4511,8 @@ public final class Operation {
           reason_ = other.reason_;
           onChanged();
         }
-        if (other.hasCheckSum()) {
-          bitField0_ |= 0x00000100;
-          checkSum_ = other.checkSum_;
-          onChanged();
-        }
         if (other.hasSignature()) {
-          bitField0_ |= 0x00000200;
+          bitField0_ |= 0x00000100;
           signature_ = other.signature_;
           onChanged();
         }
@@ -5371,91 +5117,15 @@ public final class Operation {
         return this;
       }
 
-      private java.lang.Object checkSum_ = "";
+      private java.lang.Object signature_ = "";
       /**
-       * <code>optional string checkSum = 9;</code>
+       * <code>optional string signature = 9;</code>
        */
-      public boolean hasCheckSum() {
+      public boolean hasSignature() {
         return ((bitField0_ & 0x00000100) == 0x00000100);
       }
       /**
-       * <code>optional string checkSum = 9;</code>
-       */
-      public java.lang.String getCheckSum() {
-        java.lang.Object ref = checkSum_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            checkSum_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string checkSum = 9;</code>
-       */
-      public com.google.protobuf.ByteString
-          getCheckSumBytes() {
-        java.lang.Object ref = checkSum_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          checkSum_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string checkSum = 9;</code>
-       */
-      public Builder setCheckSum(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000100;
-        checkSum_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string checkSum = 9;</code>
-       */
-      public Builder clearCheckSum() {
-        bitField0_ = (bitField0_ & ~0x00000100);
-        checkSum_ = getDefaultInstance().getCheckSum();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string checkSum = 9;</code>
-       */
-      public Builder setCheckSumBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000100;
-        checkSum_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object signature_ = "";
-      /**
-       * <code>optional string signature = 10;</code>
-       */
-      public boolean hasSignature() {
-        return ((bitField0_ & 0x00000200) == 0x00000200);
-      }
-      /**
-       * <code>optional string signature = 10;</code>
+       * <code>optional string signature = 9;</code>
        */
       public java.lang.String getSignature() {
         java.lang.Object ref = signature_;
@@ -5472,7 +5142,7 @@ public final class Operation {
         }
       }
       /**
-       * <code>optional string signature = 10;</code>
+       * <code>optional string signature = 9;</code>
        */
       public com.google.protobuf.ByteString
           getSignatureBytes() {
@@ -5488,36 +5158,36 @@ public final class Operation {
         }
       }
       /**
-       * <code>optional string signature = 10;</code>
+       * <code>optional string signature = 9;</code>
        */
       public Builder setSignature(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000200;
+  bitField0_ |= 0x00000100;
         signature_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string signature = 10;</code>
+       * <code>optional string signature = 9;</code>
        */
       public Builder clearSignature() {
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000100);
         signature_ = getDefaultInstance().getSignature();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string signature = 10;</code>
+       * <code>optional string signature = 9;</code>
        */
       public Builder setSignatureBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000200;
+  bitField0_ |= 0x00000100;
         signature_ = value;
         onChanged();
         return this;
@@ -5601,18 +5271,17 @@ public final class Operation {
   static {
     java.lang.String[] descriptorData = {
       "\n\017operation.proto\022\032com.kakaobank.demo.ym" +
-      "oh.fb\"\233\001\n\013PushRequest\022\r\n\005token\030\001 \002(\t\022\014\n\004" +
+      "oh.fb\"\211\001\n\013PushRequest\022\r\n\005token\030\001 \002(\t\022\014\n\004" +
       "user\030\002 \002(\t\022\020\n\010fileName\030\003 \002(\t\022\016\n\006length\030\004" +
       " \002(\003\022\014\n\004path\030\005 \001(\t\022\014\n\004date\030\006 \001(\t\022\014\n\004time" +
-      "\030\007 \001(\t\022\020\n\010checkSum\030\010 \001(\t\022\021\n\tsignature\030\t " +
-      "\001(\t\"@\n\017SessionResponse\022\r\n\005token\030\001 \002(\t\022\016\n" +
-      "\006status\030\002 \002(\t\022\016\n\006reason\030\003 \001(\t\"<\n\013PullReq" +
-      "uest\022\014\n\004user\030\001 \002(\t\022\014\n\004path\030\002 \001(\t\022\021\n\tsign" +
-      "ature\030\003 \001(\t\"\256\001\n\014PullResponse\022\r\n\005token\030\001 " +
-      "\002(\t\022\020\n\010fileName\030\002 \002(\t\022\016\n\006length\030\003 \002(\003\022\014\n",
-      "\004path\030\004 \001(\t\022\014\n\004date\030\005 \001(\t\022\014\n\004time\030\006 \001(\t\022" +
-      "\016\n\006status\030\007 \001(\t\022\016\n\006reason\030\010 \001(\t\022\020\n\010check" +
-      "Sum\030\t \001(\t\022\021\n\tsignature\030\n \001(\t"
+      "\030\007 \001(\t\022\021\n\tsignature\030\010 \001(\t\"@\n\017SessionResp" +
+      "onse\022\r\n\005token\030\001 \002(\t\022\016\n\006status\030\002 \002(\t\022\016\n\006r" +
+      "eason\030\003 \001(\t\"<\n\013PullRequest\022\014\n\004user\030\001 \002(\t" +
+      "\022\014\n\004path\030\002 \001(\t\022\021\n\tsignature\030\003 \001(\t\"\234\001\n\014Pu" +
+      "llResponse\022\r\n\005token\030\001 \002(\t\022\020\n\010fileName\030\002 " +
+      "\002(\t\022\016\n\006length\030\003 \002(\003\022\014\n\004path\030\004 \001(\t\022\014\n\004dat",
+      "e\030\005 \001(\t\022\014\n\004time\030\006 \001(\t\022\016\n\006status\030\007 \001(\t\022\016\n" +
+      "\006reason\030\010 \001(\t\022\021\n\tsignature\030\t \001(\t"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5631,7 +5300,7 @@ public final class Operation {
     internal_static_com_kakaobank_demo_ymoh_fb_PushRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_kakaobank_demo_ymoh_fb_PushRequest_descriptor,
-        new java.lang.String[] { "Token", "User", "FileName", "Length", "Path", "Date", "Time", "CheckSum", "Signature", });
+        new java.lang.String[] { "Token", "User", "FileName", "Length", "Path", "Date", "Time", "Signature", });
     internal_static_com_kakaobank_demo_ymoh_fb_SessionResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_com_kakaobank_demo_ymoh_fb_SessionResponse_fieldAccessorTable = new
@@ -5649,7 +5318,7 @@ public final class Operation {
     internal_static_com_kakaobank_demo_ymoh_fb_PullResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_kakaobank_demo_ymoh_fb_PullResponse_descriptor,
-        new java.lang.String[] { "Token", "FileName", "Length", "Path", "Date", "Time", "Status", "Reason", "CheckSum", "Signature", });
+        new java.lang.String[] { "Token", "FileName", "Length", "Path", "Date", "Time", "Status", "Reason", "Signature", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

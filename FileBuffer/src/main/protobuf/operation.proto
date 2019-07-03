@@ -18,9 +18,7 @@ message PushRequest {
 
 	optional string time = 7;
 
-	optional string checkSum = 8;
-
-	optional string signature = 9;
+	optional string signature = 8;
 
 }
 
@@ -62,8 +60,6 @@ message PullResponse {
 
 	optional string reason = 8;
 
-	optional string checkSum = 9;
-
-	optional string signature = 10;
+	optional string signature = 9;
 
 }
