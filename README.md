@@ -15,7 +15,7 @@
    - Maven 3
 
 # 3. Maven 환경 설정
-##   IntelliJ IDEA의 Preference에 Maven User settings file 경로 ```(~/.m2/settings.xml)```와  Local repository ```(~/.m2/repository)```를 별도로 지정하고 다음과 같이 settings.xml을 작성
+   - IntelliJ IDEA의 Preference에 Maven User settings file 경로 ```(~/.m2/settings.xml)```와  Local repository ```(~/.m2/repository)```를 별도로 지정하고 다음과 같이 settings.xml을 작성
 
 <pre><code>
 &lt;settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
