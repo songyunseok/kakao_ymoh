@@ -17,10 +17,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -156,6 +153,22 @@ public class FileGateway extends ServerBase implements Server, SessionListener {
         if (session != null) {
             logger.info("Remove a client session '{}'", id);
         }
+    }
+
+    public List<SessionOperator> getAllOperators() {
+        return Collections.unmodifiableList(operators);
+    }
+
+    public List<Session> getAllSessions() {
+        List<Session> list = new ArrayList<>();
+        List<String> ids = new ArrayList<>(sessions.keySet());
+        for (String id : ids) {
+            Session session = sessions.get(id);
+            if (session != null) {
+                list.add(session);
+            }
+        }
+        return Collections.unmodifiableList(list);
     }
 
 }

@@ -6,6 +6,10 @@ public interface SessionOperator {
 
     String getSupportedMethod();
 
+    long getGoodCount();
+
+    long getBadCount();
+
     void operate(SessionCommand command, SocketChannel socketChannel) throws Exception;
 
 }

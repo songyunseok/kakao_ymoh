@@ -24,9 +24,7 @@ public abstract class SocketTransport extends ServerBase implements Server {
 
     private int port;
 
-    //private Selector selector;
-
-    //private SocketChannel socketChannel;
+    private volatile long count;
 
     protected File homeDir;
 
@@ -36,8 +34,6 @@ public abstract class SocketTransport extends ServerBase implements Server {
 
     @Autowired
     private Environment env;
-
-    //public void setIdentifier(String identifier) { this.identifier = identifier; }
 
     @Value("${gateway.host:localhost}")
     public void setHost(String host) {
@@ -60,6 +56,14 @@ public abstract class SocketTransport extends ServerBase implements Server {
     public abstract String getMethod();
 
     protected abstract String getHomePathPropertyName();
+
+    public long getCount() {
+        return count;
+    }
+
+    protected void increaseCount() {
+        ++count;
+    }
 
     protected void resolveHomeDir() {
         File userDir = new File(System.getProperty("user.dir"));

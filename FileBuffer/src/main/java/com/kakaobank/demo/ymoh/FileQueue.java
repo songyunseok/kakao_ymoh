@@ -11,8 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class FileQueue {
 
     public enum CommitMode {
-        MOVE,
         DELETE,
+        MOVE,
     }
 
     private Lock lock = new ReentrantLock();
@@ -54,7 +54,6 @@ public class FileQueue {
                         token = UUID.randomUUID().toString();
                         tokens.add(token);
                         this.files.put(token, file);
-                        //this.pending.put(token, tid);
                     }
                 }
             }
@@ -107,6 +106,7 @@ public class FileQueue {
     public void commit(String token, CommitMode mode) {
         lock.lock();
         try {
+            tokens.remove(token);
             pending.remove(token);
             File file = files.remove(token);
             int index = -1;

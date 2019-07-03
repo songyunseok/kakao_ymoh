@@ -80,11 +80,11 @@ public class PullTransport extends SocketTransport {
                 reason = "";
             } catch (EOFException ex) {
                 status = "";
-                logger.warn("Failed to input a pushed file", ex.getMessage());
+                logger.warn("Failed to output a file", ex);
             } catch (Exception ex) {
                 status = "FAIL";
                 reason = ex.getMessage();
-                logger.warn("Failed to input a pushed file", ex.getMessage());
+                logger.warn("Failed to output a file", ex);
             } finally {
                 try {
                     if (outputStream != null) {
@@ -94,13 +94,14 @@ public class PullTransport extends SocketTransport {
                         if (status.equals("OK")) {
                             File dest = new File(homeDir, fileName);
                             tempFile.renameTo(dest);
+                            increaseCount();
                         } else {
                             tempFile.delete();
                         }
                     }
                 } catch (Exception ex) {
                     status = "";
-                    logger.warn("Failed to close a pushed file", ex.getMessage());
+                    logger.warn("Failed to close an output file", ex.getMessage());
                 }
                 if (status.isEmpty() == false) {
                     Operation.SessionResponse reply = Operation.SessionResponse.newBuilder()

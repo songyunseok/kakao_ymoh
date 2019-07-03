@@ -30,7 +30,7 @@ import java.util.Date;
  *  FT <-- length of SessionResponse (6 bytes) + SessionResponse (n bytes)
  */
 @Component
-public class PushOperator implements SessionOperator {
+public class PushOperator extends AbstractOperator implements SessionOperator {
 
     private static Logger logger = LoggerFactory.getLogger(PushOperator.class);
 
@@ -103,11 +103,7 @@ public class PushOperator implements SessionOperator {
                     .setStatus(status)
                     .setReason(reason)
                     .build();
-            byte[] respBytes = resp.toByteArray();
-            byte[] sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
-            SessionUtils.putInt(sizeBytes, respBytes.length);
-            SessionUtils.write(socketChannel, sizeBytes);
-            SessionUtils.write(socketChannel, respBytes);
+            writeResponse(socketChannel, resp.toByteArray());
             if (status.equals("OK")) {
                 File tempFile = null;
                 OutputStream outputStream = null;
@@ -123,11 +119,11 @@ public class PushOperator implements SessionOperator {
                     reason = "";
                 } catch (EOFException ex) {
                     status = "";
-                    logger.warn("Failed to input a pushed file", ex.getMessage());
+                    logger.warn("Failed to input a file", ex);
                 } catch (Exception ex) {
                     status = "FAIL";
                     reason = ex.getMessage();
-                    logger.warn("Failed to input a pushed file", ex.getMessage());
+                    logger.warn("Failed to input a file", ex);
                 } finally {
                     try {
                         if (outputStream != null) {
@@ -137,13 +133,15 @@ public class PushOperator implements SessionOperator {
                             if (status.equals("OK")) {
                                 File dest = new File(homeDir, fileName);
                                 tempFile.renameTo(dest);
+                                increaseGoodCount();
                             } else {
                                 tempFile.delete();
+                                increaseBadCount();
                             }
                         }
                     } catch (Exception ex) {
                         status = "";
-                        logger.warn("Failed to close a pushed file", ex.getMessage());
+                        logger.warn("Failed to close an input file", ex);
                     }
                     if (status.isEmpty() == false) {
                         resp = Operation.SessionResponse.newBuilder()
@@ -151,11 +149,7 @@ public class PushOperator implements SessionOperator {
                                 .setStatus(status)
                                 .setReason(reason)
                                 .build();
-                        respBytes = resp.toByteArray();
-                        sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
-                        SessionUtils.putInt(sizeBytes, respBytes.length);
-                        SessionUtils.write(socketChannel, sizeBytes);
-                        SessionUtils.write(socketChannel, respBytes);
+                        writeResponse(socketChannel, resp.toByteArray());
                     }
                 }
             }

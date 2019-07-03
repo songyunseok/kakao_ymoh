@@ -32,7 +32,7 @@ import java.util.Date;
  *  FT --> length of SessionResponse (6 bytes) + SessionResponse (n bytes)
  */
 @Component
-public class PullOperator implements SessionOperator {
+public class PullOperator extends AbstractOperator implements SessionOperator {
 
     private static Logger logger = LoggerFactory.getLogger(PullOperator.class);
 
@@ -98,7 +98,7 @@ public class PullOperator implements SessionOperator {
             } catch (Exception ex) {
                 status = "FAIL";
                 reason = ex.getMessage();
-                logger.warn("Failed to list files", ex.getMessage());
+                logger.warn("Failed to list files", ex);
             }
             Date date = new Date();
             Operation.PullResponse resp = Operation.PullResponse.newBuilder()
@@ -110,11 +110,7 @@ public class PullOperator implements SessionOperator {
                     .setStatus(status)
                     .setReason(reason)
                     .build();
-            byte[] respBytes = resp.toByteArray();
-            byte[] sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
-            SessionUtils.putInt(sizeBytes, respBytes.length);
-            SessionUtils.write(socketChannel, sizeBytes);
-            SessionUtils.write(socketChannel, respBytes);
+            writeResponse(socketChannel, resp.toByteArray());
             if (status.equals("OK") && inputFile != null) {
                 InputStream inputStream = null;
                 try {
@@ -124,48 +120,35 @@ public class PullOperator implements SessionOperator {
                         throw new EOFException(String.format("PullOperator '%s' was disconnected", command.getSessionId()));
                     }
                     status = "OK";
+                    increaseGoodCount();
                 } catch (EOFException ex) {
                     status = "";
-                    logger.warn("Failed to output a pulled file", ex.getMessage());
+                    logger.warn("Failed to output a file", ex);
+                    increaseBadCount();
                 } catch (Exception ex) {
                     status = "FAIL";
-                    logger.warn("Failed to output a pulled file", ex.getMessage());
+                    logger.warn("Failed to output a file", ex);
+                    increaseBadCount();
                 } finally {
                     try {
                         if (inputStream != null) {
                             inputStream.close();
                         }
+                        if (status.equals("OK")) {
+                            queue.commit(token);
+                        } else {
+                            queue.rollback(token);
+                        }
                     } catch (Exception ex) {
                         status = "";
-                        logger.warn("Failed to close a pulled file", ex.getMessage());
+                        logger.warn("Failed to close an output file", ex);
                     }
                     if (status.isEmpty() == false) {
                         try {
-                            sizeBytes = new byte[SessionUtils.OP_LENGTH_SIZE];
-                            n = SessionUtils.read(socketChannel, sizeBytes);
-                            if (n < 0) {
-                                throw new EOFException(String.format("PullOperator '%s' was disconnected", command.getSessionId()));
-                            }
-                            respBytes = new byte[SessionUtils.parseInt(sizeBytes)];
-                            Operation.SessionResponse reply = Operation.SessionResponse.parseFrom(respBytes);
-                            if (token.equals(reply.getToken())) {
-                                status = reply.getStatus();
-                                if (status.equals("OK") == false) {
-                                    reason = reply.getReason();
-                                    throw new SessionException(reason != null && reason.length() > 0 ? reason: "Unknown reason");
-                                }
-                            } else {
-                                throw new SessionException("Token in reply is invalid");
-                            }
+                            readResponse(socketChannel, command.getSessionId(), token);
                         } catch (Exception ex) {
                             status = "";
-                            logger.warn("Failed to complete a pulled file", ex.getMessage());
-                        } finally {
-                            if (status.equals("OK")) {
-                                queue.commit(token);
-                            } else {
-                                queue.rollback(token);
-                            }
+                            logger.warn("Failed to complete an output file", ex);
                         }
                     }
                 }

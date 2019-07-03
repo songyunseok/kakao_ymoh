@@ -28,10 +28,18 @@ public class FileSession extends ServerBase implements Session {
 
     private static volatile long instanceCounter = 0;
 
+    private String address;
+
     public FileSession(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
         //this.sessionId = UUID.randomUUID().toString();
         this.identifier = "FS_" + Long.toString(++instanceCounter);
+
+    }
+
+    @Override
+    public String getAddress() {
+        return address;
     }
 
     @Override
@@ -42,6 +50,7 @@ public class FileSession extends ServerBase implements Session {
     @Override
     protected void doStart() {
         try {
+            address = socketChannel.getRemoteAddress().toString();
             while (true) {
                 if (interrupted.get()) {
                     break;
@@ -79,6 +88,8 @@ public class FileSession extends ServerBase implements Session {
                     break;
                 }
             }
+        } catch (Exception e) {
+            logger.error(String.format("FileSession '%s' was NOT started", identifier), e);
         } finally {
             for (SessionListener listener : listeners) {
                 listener.sessionStopping(identifier);

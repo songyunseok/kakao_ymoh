@@ -86,6 +86,7 @@ public class PushTransport extends SocketTransport {
                 }
                 readResponse(socketChannel, token);
 
+                increaseCount();
                 queue.commit(token);
             } catch (Exception e) {
                 queue.rollback(token);
