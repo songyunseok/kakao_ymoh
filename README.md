@@ -6,7 +6,7 @@
    - Maven 3
 
 2. Maven 환경 설정
-   IntelliJ IDEA의 Preference에 User settings file을 Default 파일 경로(~/.m2/settings.xml)와 별도로 지정하고 다음과 같이 settings.xml을 작성
+   IntelliJ IDEA의 Preference에 Maven User settings file 경로(~/.m2/settings.xml)와  Local repository(~/.m2/repository)를 별도로 지정하고 다음과 같이 settings.xml을 작성
 
 <pre><code>
 &lt;settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
@@ -44,4 +44,11 @@
 &lt;/settings&gt;
 </code></pre>
 
-3. GIT Clone
+3. GIT Clone (예제)
+<pre><code>git clone https://github.com/spark3dev/kakao_ymoh.git</code></pre>
+
+4. Maven build (예제)
+<pre><code>
+cd ${user.dir}/${project.home}
+mvn -s ${user.dir}/m2/settings.xml -Dmaven.repo.local=${user.dir}/m2/repository clean install
+</code></pre>
